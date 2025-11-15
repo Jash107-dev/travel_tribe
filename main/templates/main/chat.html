@@ -1,0 +1,158 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ trip.destination }} - Tribe Chat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/chat_modern.css' %}">
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Chat Header -->
+        <header class="chat-header">
+            <div class="header-left">
+                <button onclick="window.history.back()" class="back-btn" style="border: none; cursor: pointer;">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="chat-info">
+                    <h1>{{ trip.destination }}</h1>
+                    <p>{{ trip.joined_members.count }} members • {{ trip.interests }}</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="icon-btn" title="Trip Info">
+                    <i class="fas fa-info-circle"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Security Warning -->
+        <div class="security-warning">
+            <i class="fas fa-shield-alt"></i>
+            <strong>Stay Safe:</strong> Do not share personal details (phone, address, financial info) until you meet in person. Report suspicious behavior.
+        </div>
+
+        <!-- Messages Area -->
+        <div class="messages-container" id="messagesContainer">
+            <div class="messages-wrapper">
+                {% for msg in messages %}
+                <div class="message {% if msg.user == request.user %}message-sent{% else %}message-received{% endif %}">
+                    <div class="message-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-author">{{ msg.user.username }}</span>
+                            <span class="message-time">{{ msg.timestamp|date:"M d, H:i" }}</span>
+                        </div>
+                        <div class="message-bubble">
+                            {% if msg.content %}
+                                {{ msg.content }}
+                            {% endif %}
+                            {% if msg.media_file %}
+                                <div class="message-media">
+                                    {% if msg.is_image %}
+                                        <img src="{{ msg.media_file.url }}" alt="Shared image" style="max-width: 300px; border-radius: 8px; margin-top: 0.5rem;">
+                                    {% elif msg.is_video %}
+                                        <video controls style="max-width: 300px; border-radius: 8px; margin-top: 0.5rem;">
+                                            <source src="{{ msg.media_file.url }}" type="video/mp4">
+                                            Your browser does not support video.
+                                        </video>
+                                    {% else %}
+                                        <a href="{{ msg.media_file.url }}" target="_blank" class="media-link">
+                                            <i class="fas fa-file"></i> View File
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-chat">
+                    <i class="fas fa-comments"></i>
+                    <h3>No messages yet</h3>
+                    <p>Start the conversation with your tribe!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Message Input -->
+        <footer class="chat-footer">
+            <form method="POST" enctype="multipart/form-data" class="message-form" id="messageForm">
+                {% csrf_token %}
+                <input 
+                    type="file" 
+                    name="media_file" 
+                    id="mediaInput" 
+                    accept="image/*,video/*"
+                    style="display: none;"
+                >
+                <button type="button" class="icon-btn" title="Attach Media" onclick="document.getElementById('mediaInput').click()">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+                <input 
+                    type="text" 
+                    name="content" 
+                    placeholder="Type your message..." 
+                    autocomplete="off"
+                    class="message-input"
+                    id="messageInput"
+                >
+                <button type="submit" class="send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+            <div id="mediaPreview" style="display: none; padding: 0.5rem; background: #f0f0f0; border-radius: 8px; margin-top: 0.5rem;">
+                <span id="mediaFileName"></span>
+                <button type="button" onclick="clearMedia()" style="margin-left: 1rem; color: red; border: none; background: none; cursor: pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Auto-scroll to bottom
+        const messagesContainer = document.getElementById('messagesContainer');
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        // Focus input on load
+        document.getElementById('messageInput').focus();
+
+        // Media file preview
+        document.getElementById('mediaInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('mediaPreview').style.display = 'block';
+                document.getElementById('mediaFileName').textContent = file.name;
+            }
+        });
+
+        function clearMedia() {
+            document.getElementById('mediaInput').value = '';
+            document.getElementById('mediaPreview').style.display = 'none';
+        }
+
+        // Handle form submission
+        const form = document.getElementById('messageForm');
+        form.addEventListener('submit', (e) => {
+            const input = document.getElementById('messageInput');
+            const mediaInput = document.getElementById('mediaInput');
+            
+            // Allow submission if there's text or media
+            if (!input.value.trim() && !mediaInput.files.length) {
+                e.preventDefault();
+                return;
+            }
+            // Form will submit normally
+        });
+
+        // Manual refresh button (optional - user can refresh browser to see new messages)
+        // Or implement WebSocket for real-time updates in production
+    </script>
+</body>
+</html>

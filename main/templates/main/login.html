@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | Travel Tribe</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+  <div class="login-container">
+    <!-- Left Section - Hero -->
+    <div class="login-hero">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="logo-wrapper">
+          <img src="{% static 'img/logo_login.png' %}" alt="Travel Tribe" class="hero-logo">
+        </div>
+        <h1 class="hero-title">Travel Tribe</h1>
+        <p class="hero-subtitle">Connect with fellow travelers and explore the world together</p>
+        <div class="hero-features">
+          <div class="feature-item">
+            <i class="fas fa-users"></i>
+            <span>Find Travel Buddies</span>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-map-marked-alt"></i>
+            <span>Discover Destinations</span>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-comments"></i>
+            <span>Chat & Plan Together</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Section - Login Form -->
+    <div class="login-form-section">
+      <div class="login-form-wrapper">
+        <div class="form-header">
+          <h2>Welcome Back!</h2>
+          <p>Login to continue your adventure</p>
+        </div>
+
+        {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+          <div class="message message-{{ message.tags }}">
+            <i class="fas fa-info-circle"></i>
+            {{ message }}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'login' %}" class="login-form">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ next|default:'' }}">
+
+          <div class="form-group">
+            <label for="username"><i class="fas fa-user"></i> Username</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required autocomplete="username">
+          </div>
+
+          <div class="form-group">
+            <label for="password"><i class="fas fa-lock"></i> Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+          </div>
+
+          <button type="submit" class="btn-login">
+            <i class="fas fa-sign-in-alt"></i> Log In
+          </button>
+
+          <div class="divider">
+            <span>OR</span>
+          </div>
+
+          <a href="{% url 'register' %}" class="btn-register">
+            <i class="fas fa-user-plus"></i> Create New Account
+          </a>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

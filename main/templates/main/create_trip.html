@@ -1,0 +1,127 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Create Trip - Travel Tribe{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-page-container">
+  <div class="container">
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-icon">
+          <i class="fas fa-plus-circle"></i>
+        </div>
+        <h1>Create Your Trip</h1>
+        <p>Find travel companions for your next adventure</p>
+      </div>
+
+      <form method="POST" class="modern-form">
+        {% csrf_token %}
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.destination.id_for_label }}">
+              <i class="fas fa-map-marker-alt"></i> Destination
+            </label>
+            {{ form.destination }}
+            {% if form.destination.errors %}
+              <span class="error-message">{{ form.destination.errors.0 }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.start_date.id_for_label }}">
+              <i class="fas fa-calendar-alt"></i> Start Date
+            </label>
+            {{ form.start_date }}
+            {% if form.start_date.errors %}
+              <span class="error-message">{{ form.start_date.errors.0 }}</span>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.end_date.id_for_label }}">
+              <i class="fas fa-calendar-check"></i> End Date
+            </label>
+            {{ form.end_date }}
+            {% if form.end_date.errors %}
+              <span class="error-message">{{ form.end_date.errors.0 }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.interests.id_for_label }}">
+              <i class="fas fa-heart"></i> Travel Interests
+            </label>
+            {{ form.interests }}
+            {% if form.interests.errors %}
+              <span class="error-message">{{ form.interests.errors.0 }}</span>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.gender_preference.id_for_label }}">
+              <i class="fas fa-venus-mars"></i> Gender Preference
+            </label>
+            {{ form.gender_preference }}
+            {% if form.gender_preference.errors %}
+              <span class="error-message">{{ form.gender_preference.errors.0 }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.budget_range.id_for_label }}">
+              <i class="fas fa-wallet"></i> Budget Range
+            </label>
+            {{ form.budget_range }}
+            {% if form.budget_range.errors %}
+              <span class="error-message">{{ form.budget_range.errors.0 }}</span>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.members_limit.id_for_label }}">
+              <i class="fas fa-users"></i> Members Limit
+            </label>
+            {{ form.members_limit }}
+            {% if form.members_limit.errors %}
+              <span class="error-message">{{ form.members_limit.errors.0 }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.description.id_for_label }}">
+              <i class="fas fa-align-left"></i> Description
+            </label>
+            {{ form.description }}
+            {% if form.description.errors %}
+              <span class="error-message">{{ form.description.errors.0 }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <a href="{% url 'trip_feed' %}" class="btn btn-outline">
+            <i class="fas fa-times"></i> Cancel
+          </a>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-paper-plane"></i> Create Trip
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

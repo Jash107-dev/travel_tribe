@@ -1,0 +1,123 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Travel Tribe - Your Travel Companion{% endblock %}</title>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Global Styles -->
+    <link rel="stylesheet" href="{% static 'css/global.css' %}">
+    
+    <!-- Chatbot CSS -->
+    <link rel="stylesheet" href="{% static 'css/chatbot.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{% url 'home' %}" class="navbar-brand">
+                <img src="{% static 'img/logo_main.jpg' %}" alt="Travel Tribe" class="navbar-logo">
+                <span>Travel Tribe</span>
+            </a>
+            
+            {% if user.is_authenticated %}
+            <button class="navbar-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <ul class="navbar-menu" id="navMenu">
+                <li><a href="{% url 'home' %}" class="navbar-link"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="{% url 'trip_feed' %}" class="navbar-link"><i class="fas fa-users"></i> Find Tribe</a></li>
+                <li><a href="{% url 'create_trip' %}" class="navbar-link"><i class="fas fa-plus-circle"></i> Create Trip</a></li>
+                <li><a href="{% url 'add_trip' %}" class="navbar-link"><i class="fas fa-map-marked-alt"></i> Add Destination</a></li>
+                <li><a href="{% url 'user_profile' %}" class="navbar-link"><i class="fas fa-user-circle"></i> Profile</a></li>
+                <li><a href="{% url 'logout' %}" class="navbar-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} fade-in">
+            <i class="fas fa-info-circle"></i> {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Travel Tribe</h4>
+                    <p>Connect, Explore, Adventure 🌍✈️</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Contact Us</h4>
+                    <p><i class="fas fa-envelope"></i> <a href="mailto:support.travel_tribe@gmail.com">support.travel_tribe@gmail.com</a></p>
+                    <p><i class="fab fa-instagram"></i> <a href="https://instagram.com/team_travel_tribe" target="_blank" rel="noopener noreferrer">team_travel_tribe</a></p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Follow Us</h4>
+                    <div class="footer-social">
+                        <a href="https://instagram.com/team_travel_tribe" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 Travel Tribe. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        const navToggle = document.getElementById('navToggle');
+        const navMenu = document.getElementById('navMenu');
+        
+        if (navToggle) {
+            navToggle.addEventListener('click', () => {
+                navMenu.classList.toggle('active');
+            });
+        }
+
+        // Auto-hide messages after 5 seconds
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
+    </script>
+
+    {% block extra_js %}{% endblock %}
+    
+    <!-- AI Chatbot (only for authenticated users) -->
+    {% if user.is_authenticated %}
+    {% include 'main/chatbot.html' %}
+    <script src="{% static 'js/chatbot.js' %}"></script>
+    {% endif %}
+</body>
+</html>

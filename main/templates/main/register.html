@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register | Travel Tribe</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'css/register.css' %}">
+</head>
+<body>
+  <div class="register-container">
+    <!-- Animated Background -->
+    <div class="bg-animation">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
+
+    <div class="register-card">
+      <div class="card-header">
+        <img src="{% static 'img/logo_main.jpg' %}" alt="Travel Tribe" class="logo">
+        <h1>Join Travel Tribe</h1>
+        <p>Start your adventure with fellow travelers 🌍✈️</p>
+      </div>
+
+      {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+        <div class="message message-{{ message.tags }}">
+          <i class="fas fa-info-circle"></i>
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="POST" class="register-form">
+        {% csrf_token %}
+        
+        <div class="form-group">
+          <label for="username">
+            <i class="fas fa-user"></i> Username
+          </label>
+          <input type="text" id="username" name="username" placeholder="Choose a unique username" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">
+            <i class="fas fa-envelope"></i> Email Address
+          </label>
+          <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password1">
+            <i class="fas fa-lock"></i> Password
+          </label>
+          <input type="password" id="password1" name="password1" placeholder="Create a strong password" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password2">
+            <i class="fas fa-lock"></i> Confirm Password
+          </label>
+          <input type="password" id="password2" name="password2" placeholder="Re-enter your password" required>
+        </div>
+
+        <button type="submit" class="btn-register">
+          <i class="fas fa-user-plus"></i> Create Account
+        </button>
+      </form>
+
+      <div class="card-footer">
+        <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Auto-hide messages
+    setTimeout(() => {
+      const messages = document.querySelectorAll('.message');
+      messages.forEach(msg => {
+        msg.style.opacity = '0';
+        setTimeout(() => msg.remove(), 300);
+      });
+    }, 5000);
+  </script>
+</body>
+</html>

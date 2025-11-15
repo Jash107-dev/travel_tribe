@@ -1,0 +1,220 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}{{ trip.destination }} - Travel Tribe{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/trip_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="trip-detail-container">
+  <div class="container">
+    <!-- Back Button -->
+    <a href="{% url 'home' %}" class="back-link">
+      <i class="fas fa-arrow-left"></i> Back to Home
+    </a>
+
+    <!-- Hero Section -->
+    <div class="trip-hero">
+      {% if trip.main_image %}
+      <img src="{{ trip.main_image.url }}" alt="{{ trip.destination }}" class="hero-image">
+      {% else %}
+      <div class="hero-placeholder">
+        <i class="fas fa-image"></i>
+      </div>
+      {% endif %}
+      <div class="hero-overlay">
+        <h1 class="trip-title">{{ trip.destination }}</h1>
+        <div class="trip-meta">
+          <span class="meta-item">
+            <i class="fas fa-calendar-alt"></i>
+            {{ trip.start_date|date:"M d" }} - {{ trip.end_date|date:"M d, Y" }}
+          </span>
+          <span class="meta-item">
+            <i class="fas fa-users"></i>
+            {{ trip.tribe_count }} travelers
+          </span>
+          <span class="meta-item">
+            <i class="fas fa-utensils"></i>
+            {{ trip.food_type }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="content-grid">
+      <!-- Main Content -->
+      <div class="main-content">
+        <!-- Description Card -->
+        {% if trip.description %}
+        <div class="info-card">
+          <div class="card-header">
+            <i class="fas fa-info-circle"></i>
+            <h2>About This Trip</h2>
+          </div>
+          <p class="description-text">{{ trip.description }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Must Visit Places -->
+        {% if trip.must_visit_places %}
+        <div class="info-card">
+          <div class="card-header">
+            <i class="fas fa-map-marked-alt"></i>
+            <h2>Must Visit Places</h2>
+          </div>
+          <div class="places-text">
+            <i class="fas fa-map-pin"></i>
+            {{ trip.must_visit_places }}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Must Try Foods -->
+        {% if trip.must_try_foods %}
+        <div class="info-card">
+          <div class="card-header">
+            <i class="fas fa-hamburger"></i>
+            <h2>Must Try Foods</h2>
+          </div>
+          <div class="foods-text">
+            <i class="fas fa-utensils"></i>
+            {{ trip.must_try_foods }}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Gallery -->
+        {% if images %}
+        <div class="info-card">
+          <div class="card-header">
+            <i class="fas fa-images"></i>
+            <h2>Photo Gallery</h2>
+          </div>
+          <div class="gallery-grid">
+            {% for img in images %}
+            <div class="gallery-item">
+              <img src="{{ img.image.url }}" alt="Gallery Image">
+              {% if img.caption %}
+              <div class="gallery-caption">{{ img.caption }}</div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <!-- Quick Info Card -->
+        <div class="info-card sticky-card">
+          <div class="card-header">
+            <i class="fas fa-clipboard-list"></i>
+            <h3>Trip Details</h3>
+          </div>
+          
+          <div class="detail-list">
+            <div class="detail-row">
+              <span class="detail-label">
+                <i class="fas fa-tag"></i> Category
+              </span>
+              <span class="detail-value">{{ trip.category }}</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">
+                <i class="fas fa-calendar-alt"></i> Duration
+              </span>
+              <span class="detail-value">
+                {{ trip.start_date|date:"M d" }} - {{ trip.end_date|date:"M d, Y" }}
+              </span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">
+                <i class="fas fa-users"></i> Members
+              </span>
+              <span class="detail-value">{{ trip.members_count }}/{{ trip.members_limit }}</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">
+                <i class="fas fa-utensils"></i> Food
+              </span>
+              <span class="detail-value">{{ trip.food_type }}</span>
+            </div>
+
+            {% if trip.transport_modes %}
+            <div class="detail-row">
+              <span class="detail-label">
+                <i class="fas fa-bus"></i> Transport
+              </span>
+              <span class="detail-value">{{ trip.transport_modes }}</span>
+            </div>
+            {% endif %}
+
+            <div class="detail-row">
+              <span class="detail-label">
+                <i class="fas fa-user"></i> Created By
+              </span>
+              <span class="detail-value">{{ trip.created_by.username }}</span>
+            </div>
+          </div>
+
+          {% if user.is_authenticated %}
+          <div class="card-actions">
+            {% if user in trip.joined_members.all %}
+              <a href="{% url 'leave_destination_trip' trip.id %}" class="btn btn-secondary btn-full">
+                <i class="fas fa-sign-out-alt"></i> Leave Trip
+              </a>
+            {% else %}
+              {% if trip.is_full %}
+                <button class="btn btn-full" disabled style="opacity: 0.5;">
+                  <i class="fas fa-lock"></i> Trip Full
+                </button>
+              {% else %}
+                <a href="{% url 'join_destination_trip' trip.id %}" class="btn btn-primary btn-full">
+                  <i class="fas fa-user-plus"></i> Join Trip
+                </a>
+              {% endif %}
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Joined Members Card -->
+        {% if trip.joined_members.all %}
+        <div class="info-card">
+          <div class="card-header">
+            <i class="fas fa-users"></i>
+            <h3>Joined Members ({{ trip.members_count }})</h3>
+          </div>
+          <div class="members-list">
+            {% for member in trip.joined_members.all %}
+            <div class="member-item">
+              <div class="member-avatar">
+                {% if member.profile.profile_picture %}
+                  <img src="{{ member.profile.profile_picture.url }}" alt="{{ member.username }}">
+                {% else %}
+                  <i class="fas fa-user-circle"></i>
+                {% endif %}
+              </div>
+              <div class="member-info">
+                <span class="member-name">{{ member.username }}</span>
+                {% if member.profile.location %}
+                <span class="member-location"><i class="fas fa-map-marker-alt"></i> {{ member.profile.location }}</span>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

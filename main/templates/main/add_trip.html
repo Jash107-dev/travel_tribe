@@ -1,0 +1,163 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Add Destination - Travel Tribe{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-page-container">
+  <div class="container">
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-icon">
+          <i class="fas fa-map-marked-alt"></i>
+        </div>
+        <h1>Add New Destination</h1>
+        <p>Share your favorite travel destination with the community</p>
+      </div>
+
+      <form method="POST" enctype="multipart/form-data" class="modern-form">
+        {% csrf_token %}
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.destination.id_for_label }}">
+              <i class="fas fa-map-marker-alt"></i> Destination
+            </label>
+            {{ form.destination }}
+            {% if form.destination.errors %}
+              <span class="error-message">{{ form.destination.errors.0 }}</span>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.category.id_for_label }}">
+              <i class="fas fa-globe"></i> Category
+            </label>
+            {{ form.category }}
+            {% if form.category.errors %}
+              <span class="error-message">{{ form.category.errors.0 }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.start_date.id_for_label }}">
+              <i class="fas fa-calendar-alt"></i> Start Date
+            </label>
+            {{ form.start_date }}
+            {% if form.start_date.errors %}
+              <span class="error-message">{{ form.start_date.errors.0 }}</span>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.end_date.id_for_label }}">
+              <i class="fas fa-calendar-check"></i> End Date
+            </label>
+            {{ form.end_date }}
+            {% if form.end_date.errors %}
+              <span class="error-message">{{ form.end_date.errors.0 }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.tribe_count.id_for_label }}">
+              <i class="fas fa-users"></i> Tribe Count
+            </label>
+            {{ form.tribe_count }}
+            {% if form.tribe_count.errors %}
+              <span class="error-message">{{ form.tribe_count.errors.0 }}</span>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.food_type.id_for_label }}">
+              <i class="fas fa-utensils"></i> Food Type
+            </label>
+            {{ form.food_type }}
+            {% if form.food_type.errors %}
+              <span class="error-message">{{ form.food_type.errors.0 }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.transport_modes.id_for_label }}">
+              <i class="fas fa-bus"></i> Transport Modes
+            </label>
+            {{ form.transport_modes }}
+            {% if form.transport_modes.errors %}
+              <span class="error-message">{{ form.transport_modes.errors.0 }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.must_visit_places.id_for_label }}">
+              <i class="fas fa-landmark"></i> Must Visit Places
+            </label>
+            {{ form.must_visit_places }}
+            {% if form.must_visit_places.errors %}
+              <span class="error-message">{{ form.must_visit_places.errors.0 }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.must_try_foods.id_for_label }}">
+              <i class="fas fa-hamburger"></i> Must Try Foods
+            </label>
+            {{ form.must_try_foods }}
+            {% if form.must_try_foods.errors %}
+              <span class="error-message">{{ form.must_try_foods.errors.0 }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.description.id_for_label }}">
+              <i class="fas fa-align-left"></i> Description
+            </label>
+            {{ form.description }}
+            {% if form.description.errors %}
+              <span class="error-message">{{ form.description.errors.0 }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.main_image.id_for_label }}">
+              <i class="fas fa-image"></i> Main Image
+            </label>
+            {{ form.main_image }}
+            {% if form.main_image.errors %}
+              <span class="error-message">{{ form.main_image.errors.0 }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <a href="{% url 'home' %}" class="btn btn-outline">
+            <i class="fas fa-times"></i> Cancel
+          </a>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Add Destination
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

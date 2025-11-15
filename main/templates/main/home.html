@@ -1,0 +1,323 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Home - Travel Tribe{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home_modern.css' %}">
+<link rel="stylesheet" href="{% static 'css/hunt.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="hero-overlay"></div>
+  <div class="hero-content container">
+    <h1 class="hero-title">Discover Your Next Adventure</h1>
+    <p class="hero-subtitle">Connect with travelers, explore destinations, and create unforgettable memories</p>
+    <div class="hero-buttons">
+      <a href="{% url 'trip_feed' %}" class="btn btn-primary">
+        <i class="fas fa-users"></i> Find Travel Tribe
+      </a>
+      <a href="{% url 'create_trip' %}" class="btn btn-primary">
+        <i class="fas fa-plus-circle"></i> Create Trip
+      </a>
+    </div>
+  </div>
+  <div class="scroll-indicator">
+    <i class="fas fa-chevron-down"></i>
+  </div>
+</section>
+
+<!-- Hunt Section - Must Visit Places & Foods -->
+<section class="hunt-section">
+  <div class="hunt-container">
+    <div class="hunt-header">
+      <h2><i class="fas fa-search-location"></i> Hunt</h2>
+      <p>Discover must-visit places and must-try foods across India</p>
+    </div>
+
+    <div class="hunt-search-box">
+      <div class="search-input-wrapper">
+        <i class="fas fa-search"></i>
+        <input 
+          type="text" 
+          id="huntSearchInput" 
+          placeholder="Search for a destination... (e.g., Vizag, Manali, Goa)"
+          autocomplete="off"
+        >
+      </div>
+      
+      <div class="popular-searches">
+        <span>Popular:</span>
+        <button class="popular-tag">Vizag</button>
+        <button class="popular-tag">Hyderabad</button>
+        <button class="popular-tag">Manali</button>
+        <button class="popular-tag">Goa</button>
+        <button class="popular-tag">Varanasi</button>
+        <button class="popular-tag">Agra</button>
+        <button class="popular-tag">Ladakh</button>
+        <button class="popular-tag">Jaipur</button>
+        <button class="popular-tag">Kerala</button>
+        <button class="popular-tag">Mumbai</button>
+        <button class="popular-tag">Kolkata</button>
+        <button class="popular-tag">Bangalore</button>
+      </div>
+    </div>
+
+    <div id="huntResults"></div>
+  </div>
+</section>
+
+<!-- Active Tribes Section -->
+<section class="tribes-section">
+  <div class="container">
+    <div class="section-header">
+      <h2><i class="fas fa-users"></i> Active Travel Tribes</h2>
+      <p>Join fellow travelers on exciting adventures</p>
+    </div>
+
+    <div class="tribes-grid">
+      {% for trip in tribe_posts %}
+      <div class="tribe-card">
+        <div class="tribe-card-header">
+          <div class="tribe-avatar">
+            <i class="fas fa-user-circle"></i>
+          </div>
+          <div class="tribe-info">
+            <h3>{{ trip.destination }}</h3>
+            <p class="tribe-author">by {{ trip.user.username }}</p>
+          </div>
+        </div>
+        
+        <div class="tribe-card-body">
+          <div class="tribe-detail">
+            <i class="fas fa-calendar-alt"></i>
+            <span>{{ trip.start_date|date:"M d" }} - {{ trip.end_date|date:"M d, Y" }}</span>
+          </div>
+          <div class="tribe-detail">
+            <i class="fas fa-users"></i>
+            <span>{{ trip.joined_members.count }}/{{ trip.members_limit }} members</span>
+          </div>
+          {% if trip.interests %}
+          <div class="tribe-detail">
+            <i class="fas fa-heart"></i>
+            <span class="tribe-interests-badge">{{ trip.interests }}</span>
+          </div>
+          {% endif %}
+          {% if trip.description %}
+          <p class="tribe-description">{{ trip.description|truncatewords:20 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="tribe-card-footer">
+          {% if user in trip.joined_members.all %}
+            <a href="{% url 'chat_room' trip.id %}" class="btn btn-secondary btn-sm">
+              <i class="fas fa-comments"></i> Open Chat
+            </a>
+          {% else %}
+            {% if trip.joined_members.count < trip.members_limit %}
+              <a href="{% url 'join_trip' trip.id %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-user-plus"></i> Join Tribe
+              </a>
+            {% else %}
+              <button class="btn btn-sm" disabled style="opacity: 0.5;">
+                <i class="fas fa-lock"></i> Full
+              </button>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <div class="empty-state">
+        <i class="fas fa-users-slash"></i>
+        <h3>No active tribes yet</h3>
+        <p>Be the first to create a travel tribe!</p>
+        <a href="{% url 'create_trip' %}" class="btn btn-primary">
+          <i class="fas fa-plus-circle"></i> Create First Tribe
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if tribe_posts %}
+    <div class="section-footer">
+      <a href="{% url 'trip_feed' %}" class="btn btn-outline">
+        View All Tribes <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- Popular Destinations Section -->
+<section class="destinations-section">
+  <div class="container">
+    <div class="section-header">
+      <h2><i class="fas fa-map-marked-alt"></i> Popular Destinations</h2>
+      <p>Explore amazing places recommended by our community</p>
+    </div>
+
+    <div class="destinations-grid">
+      {% for trip in within_country %}
+      <div class="destination-card">
+        {% if trip.main_image %}
+        <div class="destination-image">
+          <img src="{{ trip.main_image.url }}" alt="{{ trip.destination }}">
+          <div class="destination-overlay">
+            <a href="{% url 'trip_detail' trip.id %}" class="btn btn-primary btn-sm">
+              <i class="fas fa-eye"></i> View Details
+            </a>
+          </div>
+        </div>
+        {% else %}
+        <div class="destination-image destination-placeholder">
+          <i class="fas fa-image"></i>
+        </div>
+        {% endif %}
+        
+        <div class="destination-content">
+          <h3>{{ trip.destination }}</h3>
+          <div class="destination-meta">
+            <span><i class="fas fa-calendar"></i> {{ trip.start_date|date:"M d" }} - {{ trip.end_date|date:"M d" }}</span>
+            <span><i class="fas fa-utensils"></i> {{ trip.food_type }}</span>
+          </div>
+          {% if trip.description %}
+          <p>{{ trip.description|truncatewords:15 }}</p>
+          {% endif %}
+          <div class="destination-footer">
+            <span class="badge">{{ trip.category }}</span>
+            <span class="tribe-count"><i class="fas fa-users"></i> {{ trip.members_count }}/{{ trip.members_limit }}</span>
+          </div>
+          
+          {% if user.is_authenticated %}
+          <div class="destination-actions" style="margin-top: 10px;">
+            {% if user in trip.joined_members.all %}
+              <a href="{% url 'leave_destination_trip' trip.id %}" class="btn btn-secondary btn-sm" style="width: 100%;">
+                <i class="fas fa-sign-out-alt"></i> Leave Trip
+              </a>
+            {% else %}
+              {% if trip.is_full %}
+                <button class="btn btn-sm" disabled style="width: 100%; opacity: 0.5;">
+                  <i class="fas fa-lock"></i> Trip Full
+                </button>
+              {% else %}
+                <a href="{% url 'join_destination_trip' trip.id %}" class="btn btn-primary btn-sm" style="width: 100%;">
+                  <i class="fas fa-user-plus"></i> Join Trip
+                </a>
+              {% endif %}
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <div class="empty-state">
+        <i class="fas fa-map-marked-alt"></i>
+        <h3>No destinations yet</h3>
+        <p>Add your favorite travel destination!</p>
+        <a href="{% url 'add_trip' %}" class="btn btn-primary">
+          <i class="fas fa-plus-circle"></i> Add Destination
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- International Destinations -->
+{% if outside_country %}
+<section class="destinations-section international-section">
+  <div class="container">
+    <div class="section-header">
+      <h2><i class="fas fa-globe-americas"></i> International Destinations</h2>
+      <p>Dream destinations around the world</p>
+    </div>
+
+    <div class="destinations-grid">
+      {% for trip in outside_country %}
+      <div class="destination-card">
+        {% if trip.main_image %}
+        <div class="destination-image">
+          <img src="{{ trip.main_image.url }}" alt="{{ trip.destination }}">
+          <div class="destination-overlay">
+            <a href="{% url 'trip_detail' trip.id %}" class="btn btn-primary btn-sm">
+              <i class="fas fa-eye"></i> View Details
+            </a>
+          </div>
+        </div>
+        {% else %}
+        <div class="destination-image destination-placeholder">
+          <i class="fas fa-image"></i>
+        </div>
+        {% endif %}
+        
+        <div class="destination-content">
+          <h3>{{ trip.destination }}</h3>
+          <div class="destination-meta">
+            <span><i class="fas fa-calendar"></i> {{ trip.start_date|date:"M d" }} - {{ trip.end_date|date:"M d" }}</span>
+            <span><i class="fas fa-utensils"></i> {{ trip.food_type }}</span>
+          </div>
+          {% if trip.description %}
+          <p>{{ trip.description|truncatewords:15 }}</p>
+          {% endif %}
+          <div class="destination-footer">
+            <span class="badge badge-international">{{ trip.category }}</span>
+            <span class="tribe-count"><i class="fas fa-users"></i> {{ trip.members_count }}/{{ trip.members_limit }}</span>
+          </div>
+          
+          {% if user.is_authenticated %}
+          <div class="destination-actions" style="margin-top: 10px;">
+            {% if user in trip.joined_members.all %}
+              <a href="{% url 'leave_destination_trip' trip.id %}" class="btn btn-secondary btn-sm" style="width: 100%;">
+                <i class="fas fa-sign-out-alt"></i> Leave Trip
+              </a>
+            {% else %}
+              {% if trip.is_full %}
+                <button class="btn btn-sm" disabled style="width: 100%; opacity: 0.5;">
+                  <i class="fas fa-lock"></i> Trip Full
+                </button>
+              {% else %}
+                <a href="{% url 'join_destination_trip' trip.id %}" class="btn btn-primary btn-sm" style="width: 100%;">
+                  <i class="fas fa-user-plus"></i> Join Trip
+                </a>
+              {% endif %}
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- CTA Section -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-content">
+      <h2>Ready to Start Your Journey?</h2>
+      <p>Join thousands of travelers exploring the world together</p>
+      <div class="cta-buttons">
+        <a href="{% url 'create_trip' %}" class="btn btn-primary btn-lg">
+          <i class="fas fa-rocket"></i> Create Your Trip
+        </a>
+        <a href="{% url 'trip_feed' %}" class="btn btn-outline btn-lg">
+          <i class="fas fa-search"></i> Browse Tribes
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/hunt.js' %}"></script>
+<script>
+  // Scroll indicator
+  document.querySelector('.scroll-indicator')?.addEventListener('click', () => {
+    document.querySelector('.hunt-section').scrollIntoView({ behavior: 'smooth' });
+  });
+</script>
+{% endblock %}

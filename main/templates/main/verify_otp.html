@@ -1,0 +1,75 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Verify OTP - Travel Tribe{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-page-container">
+  <div class="container">
+    <div class="form-card" style="max-width: 500px;">
+      <div class="form-header">
+        <div class="form-icon">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <h1>Verify OTP</h1>
+        <p>Enter the 6-digit code sent to your email</p>
+      </div>
+
+      <!-- Instructions -->
+      <div class="info-box" style="background: #FFF3E0; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #FF9800;">
+        <p style="margin: 0; color: #E65100; font-size: 0.9rem;">
+          <i class="fas fa-clock"></i> 
+          <strong>Important:</strong><br>
+          • OTP is valid for 5 minutes only<br>
+          • Check your email inbox (and spam folder)<br>
+          • OTP is case-sensitive (numbers only)<br>
+          • Your old password will be replaced with the new one
+        </p>
+      </div>
+
+      <form method="POST" class="modern-form">
+        {% csrf_token %}
+        
+        <div class="form-group">
+          <label for="{{ form.otp.id_for_label }}">
+            <i class="fas fa-lock"></i> 6-Digit OTP Code
+          </label>
+          {{ form.otp }}
+          {% if form.otp.errors %}
+            <span class="error-message">{{ form.otp.errors.0 }}</span>
+          {% endif %}
+          <small style="color: #7F8C8D; font-size: 0.85rem; margin-top: 0.25rem; display: block;">
+            Enter the 6-digit code from your email
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.new_password.id_for_label }}">
+            <i class="fas fa-key"></i> New Password
+          </label>
+          {{ form.new_password }}
+          {% if form.new_password.errors %}
+            <span class="error-message">{{ form.new_password.errors.0 }}</span>
+          {% endif %}
+          <small style="color: #7F8C8D; font-size: 0.85rem; margin-top: 0.25rem; display: block;">
+            Choose a strong password (min 8 characters)
+          </small>
+        </div>
+
+        <div class="form-actions">
+          <a href="{% url 'forgot_password' %}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Resend OTP
+          </a>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-check-circle"></i> Reset Password
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

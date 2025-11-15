@@ -1,0 +1,213 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Find Tribes - Travel Tribe{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/trip_feed.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="trip-feed-container">
+  <div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1><i class="fas fa-users"></i> Find Your Travel Tribe</h1>
+        <p>Connect with travelers heading to your dream destination</p>
+      </div>
+      <a href="{% url 'create_trip' %}" class="btn btn-primary">
+        <i class="fas fa-plus-circle"></i> Create New Trip
+      </a>
+    </div>
+
+    <!-- Search & Filter Section -->
+    <div class="search-filter-section">
+      <form method="GET" class="search-form">
+        <div class="search-row">
+          <!-- Search Input -->
+          <div class="search-input-group">
+            <i class="fas fa-search"></i>
+            <input 
+              type="text" 
+              name="search" 
+              placeholder="Search destination (e.g., Manali, Goa, Dubai...)" 
+              value="{{ search_query }}"
+              class="search-input"
+            >
+          </div>
+          
+          <!-- Search Button -->
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-search"></i> Search
+          </button>
+        </div>
+
+        <!-- Filters Row -->
+        <div class="filters-row">
+          <div class="filter-group">
+            <label><i class="fas fa-heart"></i> Interests</label>
+            <select name="interests" class="filter-select">
+              <option value="">All Interests</option>
+              {% for value, label in interest_choices %}
+                <option value="{{ value }}" {% if interest_filter == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label><i class="fas fa-venus-mars"></i> Gender</label>
+            <select name="gender" class="filter-select">
+              <option value="">Any Gender</option>
+              {% for value, label in gender_choices %}
+                <option value="{{ value }}" {% if gender_filter == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label><i class="fas fa-calendar"></i> Start Date</label>
+            <input type="date" name="start_date" class="filter-select">
+          </div>
+
+          <div class="filter-group">
+            <label><i class="fas fa-check-circle"></i> Available Only</label>
+            <input type="checkbox" name="available" value="true" {% if available_only == 'true' %}checked{% endif %} class="filter-checkbox">
+          </div>
+
+          <div class="filter-actions">
+            <button type="submit" class="btn btn-secondary btn-sm">
+              <i class="fas fa-filter"></i> Apply Filters
+            </button>
+            <a href="{% url 'trip_feed' %}" class="btn btn-outline btn-sm">
+              <i class="fas fa-redo"></i> Clear
+            </a>
+          </div>
+        </div>
+      </form>
+
+      <!-- Results Count -->
+      <div class="results-info">
+        <p>
+          <i class="fas fa-info-circle"></i> 
+          Found <strong>{{ trips.count }}</strong> trip{{ trips.count|pluralize }}
+          {% if search_query %}matching "{{ search_query }}"{% endif %}
+        </p>
+      </div>
+    </div>
+
+    <!-- Trips Grid -->
+    <div class="trips-grid">
+      {% for trip in trips %}
+      <div class="trip-card fade-in">
+        <div class="trip-card-header">
+          <div class="trip-avatar">
+            <i class="fas fa-user-circle"></i>
+          </div>
+          <div class="trip-user-info">
+            <h3>{{ trip.destination }}</h3>
+            <p class="trip-author">by {{ trip.user.username }}</p>
+          </div>
+          <div class="trip-status">
+            {% if trip.members_count >= trip.members_limit %}
+              <span class="badge badge-full"><i class="fas fa-lock"></i> Full</span>
+            {% else %}
+              <span class="badge badge-open"><i class="fas fa-check-circle"></i> Open</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="trip-card-body">
+          <div class="trip-details">
+            <div class="detail-item">
+              <i class="fas fa-calendar-alt"></i>
+              <span>{{ trip.start_date|date:"M d" }} - {{ trip.end_date|date:"M d, Y" }}</span>
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-heart"></i>
+              <span>{{ trip.interests }}</span>
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-venus-mars"></i>
+              <span>{{ trip.gender_preference }}</span>
+            </div>
+            {% if trip.budget_range %}
+            <div class="detail-item">
+              <i class="fas fa-wallet"></i>
+              <span>{{ trip.budget_range }}</span>
+            </div>
+            {% endif %}
+          </div>
+
+          {% if trip.description %}
+          <p class="trip-description">{{ trip.description|truncatewords:20 }}</p>
+          {% endif %}
+
+          <div class="trip-members">
+            <div class="members-count">
+              <i class="fas fa-users"></i>
+              <span>{{ trip.members_count }}/{{ trip.members_limit }} members</span>
+            </div>
+            <div class="members-progress">
+              <div class="progress-bar" data-progress="{{ trip.members_count }}" data-limit="{{ trip.members_limit }}"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="trip-card-footer">
+          {% if user == trip.user %}
+            <a href="{% url 'edit_trip_post' trip.id %}" class="btn btn-secondary btn-sm">
+              <i class="fas fa-edit"></i> Edit
+            </a>
+            <a href="{% url 'chat_room' trip.id %}" class="btn btn-primary btn-sm">
+              <i class="fas fa-comments"></i> Chat
+            </a>
+            <a href="{% url 'delete_trip_post' trip.id %}" class="btn btn-sm" style="background: #E74C3C; color: white;">
+              <i class="fas fa-trash"></i> Delete
+            </a>
+          {% elif user in trip.joined_members.all %}
+            <a href="{% url 'leave_trip' trip.id %}" class="btn btn-outline btn-sm">
+              <i class="fas fa-sign-out-alt"></i> Leave
+            </a>
+            <a href="{% url 'chat_room' trip.id %}" class="btn btn-primary btn-sm">
+              <i class="fas fa-comments"></i> Open Chat
+            </a>
+          {% else %}
+            {% if trip.members_count < trip.members_limit %}
+              <a href="{% url 'join_trip' trip.id %}" class="btn btn-primary btn-full">
+                <i class="fas fa-user-plus"></i> Join This Tribe
+              </a>
+            {% else %}
+              <button class="btn btn-full" disabled style="opacity: 0.5;">
+                <i class="fas fa-lock"></i> Tribe Full
+              </button>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <div class="empty-state">
+        <i class="fas fa-users-slash"></i>
+        <h3>No trips available yet</h3>
+        <p>Be the first to create a travel tribe and start your adventure!</p>
+        <a href="{% url 'create_trip' %}" class="btn btn-primary btn-lg">
+          <i class="fas fa-plus-circle"></i> Create First Trip
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Set progress bar widths
+  document.querySelectorAll('.progress-bar').forEach(bar => {
+    const current = parseInt(bar.dataset.progress) || 0;
+    const limit = parseInt(bar.dataset.limit) || 1;
+    const percentage = Math.min(100, Math.round((current / limit) * 100));
+    bar.style.width = percentage + '%';
+  });
+</script>
+{% endblock %}
