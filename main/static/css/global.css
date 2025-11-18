@@ -523,6 +523,24 @@ textarea.form-control {
   opacity: 0.8;
 }
 
+.footer-creator {
+  margin-top: 0.5rem !important;
+  font-size: 0.95rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 1 !important;
+}
+
+.footer-creator strong {
+  font-weight: 700;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 @media (max-width: 768px) {
   .footer-content {
     grid-template-columns: 1fr;
