@@ -77,15 +77,20 @@ WSGI_APPLICATION = 'travel_tribe.wsgi.application'
 import dj_database_url
 
 # Database configuration - use PostgreSQL on Render, SQLite locally
-if os.environ.get('DATABASE_URL'):
+DATABASE_URL = os.environ.get('DATABASE_URL')
+print(f"🔍 DATABASE_URL exists: {bool(DATABASE_URL)}")
+print(f"🔍 DATABASE_URL value: {DATABASE_URL[:50] if DATABASE_URL else 'None'}...")
+
+if DATABASE_URL:
     # Production: Use PostgreSQL from Render
     DATABASES = {
         'default': dj_database_url.config(
-            default=os.environ.get('DATABASE_URL'),
+            default=DATABASE_URL,
             conn_max_age=600,
             conn_health_checks=True,
         )
     }
+    print("✅ Using PostgreSQL database")
 else:
     # Development: Use SQLite
     DATABASES = {
@@ -94,6 +99,7 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+    print("⚠️ Using SQLite database (local development)")
 
 
 # ------------------------------------------------------------
