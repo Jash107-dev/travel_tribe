@@ -8,7 +8,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key-here')
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'  # False in production
+DEBUG = False  # Always False in production
 ALLOWED_HOSTS = ['travel-tribe-eajn.onrender.com', '*.onrender.com', '127.0.0.1', 'localhost']
 
 
@@ -119,8 +119,15 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Tell Django to look for static files in app directories
+STATICFILES_DIRS = []  # Empty because we're using app-level static folders
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Simplified WhiteNoise configuration
+WHITENOISE_AUTOREFRESH = True
+WHITENOISE_USE_FINDERS = True
 
 
 # ------------------------------------------------------------
