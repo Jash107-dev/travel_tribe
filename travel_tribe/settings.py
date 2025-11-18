@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key-here')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'  # False in production
-ALLOWED_HOSTS = ['travel-tribe-eajn.onrender.com', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['travel-tribe-eajn.onrender.com', '*.onrender.com', '127.0.0.1', 'localhost']
 
 
 # ------------------------------------------------------------
@@ -118,7 +118,12 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-# STATICFILES_DIRS removed - using app-level static folders (main/static/)
+
+# Static files finders - tells Django where to look for static files
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
 
 # WhiteNoise configuration for static files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
