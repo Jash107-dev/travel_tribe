@@ -10,6 +10,57 @@
     preferences: {}
   };
   
+  // Comprehensive Q&A Dataset
+  const commonQA = {
+    // General Travel Questions
+    'how to book': 'To book a trip: 1) Browse trips on home page, 2) Click "Join Trip", 3) Start chatting with tribe members! No payment needed - it\'s free to join.',
+    'is it free': 'Yes! Travel Tribe is completely FREE. You can join tribes, chat with members, and plan trips without any cost.',
+    'how does it work': 'Simple! Create an account → Browse trips → Join a tribe → Chat with members → Plan together → Travel together! 🌍',
+    'what is travel tribe': 'Travel Tribe is a platform to find travel buddies! Join tribes, meet like-minded travelers, and explore destinations together.',
+    'safe to use': 'Yes! We prioritize safety. Always meet in public places, verify profiles, share itinerary with family, and trust your instincts.',
+    'age limit': 'You must be 18+ to use Travel Tribe. We recommend traveling with age-appropriate groups.',
+    'solo travel': 'Perfect for solo travelers! Join tribes to meet companions, share costs, and make friends while maintaining independence.',
+    'group size': 'Trip groups vary from 2-20 members. Check each trip\'s member limit before joining.',
+    'cancel trip': 'Yes! Go to "My Trips" → Find your trip → Click "Leave" button. You can leave anytime.',
+    'create trip': 'Click "Create Trip" in navbar → Fill destination, dates, preferences → Post it! Others will join your tribe.',
+    'chat feature': 'Real-time chat with tribe members! Share photos, plan itinerary, discuss details. Access via "Open Chat" button.',
+    'payment': 'No payment on platform! Discuss and split costs directly with tribe members. We don\'t handle transactions.',
+    'refund policy': 'Since we don\'t process payments, refunds are between tribe members. Discuss payment terms before booking.',
+    'contact support': 'Email: support.travel_tribe@gmail.com | Instagram: @team_travel_tribe',
+    
+    // Destination Questions
+    'best time to visit': 'Best times vary by destination. Use our Hunt feature to find best times for 40+ Indian destinations!',
+    'visa requirements': 'Check official government websites for visa requirements. Requirements vary by destination and nationality.',
+    'budget travel': 'Join tribes to split costs! Share accommodation, transport, and meals. Budget trips available for ₹5,000-15,000.',
+    'luxury travel': 'We have luxury trips too! Dubai, international destinations, and premium experiences available.',
+    'weekend trips': 'Yes! Many short weekend trips available. Filter by dates to find 2-3 day adventures.',
+    'long trips': 'Absolutely! Find week-long or month-long adventures. Check trip duration before joining.',
+    
+    // Food & Accommodation
+    'food options': 'Each trip specifies food preferences (Veg/Non-Veg/Both). Discuss dietary needs with tribe members.',
+    'accommodation': 'Tribes decide together! Options include hotels, hostels, homestays, camping. Discuss in chat.',
+    'vegetarian food': 'Many trips offer vegetarian options. Check trip details or ask tribe leader before joining.',
+    
+    // Safety & Security
+    'verify members': 'Check member profiles, chat history, and reviews. Meet in public places first. Trust your instincts!',
+    'emergency contact': 'Always share your itinerary with family. Keep emergency contacts handy. Stay connected with tribe.',
+    'insurance': 'We recommend travel insurance for all trips. Arrange independently based on your needs.',
+    
+    // Technical Questions
+    'app available': 'Currently web-based. Mobile app coming soon! Use browser on phone for now.',
+    'notifications': 'Get chat notifications when tribe members message. Enable browser notifications for updates.',
+    'edit profile': 'Go to Profile → Edit details → Save. Update your interests, bio, and preferences.',
+    'delete account': 'Contact support at support.travel_tribe@gmail.com to delete your account.',
+    'forgot password': 'Click "Forgot Password" on login page → Enter email → Verify OTP → Reset password.',
+    
+    // Platform Features
+    'hunt feature': 'Discover must-visit places and must-try foods! Search 40+ Indian destinations with detailed info.',
+    'my trips': 'View all your trips in "My Trips" page. See joined tribes and created trips in one place.',
+    'leave tribe': 'Go to "My Trips" → Find trip → Click "Leave" → Confirm. You can leave anytime!',
+    'tribe leader': 'Trip creator is the tribe leader. They manage the trip and coordinate with members.',
+    'member limit': 'Each trip has a member limit (shown as X/Y members). Join before it fills up!',
+  };
+
   // Chatbot knowledge base
   const knowledgeBase = {
     trips: [
@@ -344,6 +395,25 @@
       
       // Store in conversation history
       userContext.conversationHistory.push({ role: 'user', message: message });
+      
+      // Check common Q&A first
+      for (const [keyword, answer] of Object.entries(commonQA)) {
+        if (lowerMessage.includes(keyword)) {
+          return answer;
+        }
+      }
+      
+      // Check if asking about specific destination from Hunt database
+      if (typeof huntDatabase !== 'undefined') {
+        for (const [key, data] of Object.entries(huntDatabase)) {
+          if (lowerMessage.includes(key) || lowerMessage.includes(data.name.toLowerCase())) {
+            return `🌍 ${data.name}, ${data.state}\n\n` +
+                   `📍 Must Visit: ${data.places.slice(0, 3).map(p => p.name).join(', ')}\n` +
+                   `🍽️ Must Try: ${data.foods.slice(0, 3).map(f => f.name).join(', ')}\n\n` +
+                   `Want more details? Use the Hunt section to explore all places and foods in ${data.name}!`;
+          }
+        }
+      }
       
       // Personal questions about the bot
       if (lowerMessage.match(/\b(who are you|what are you|your name|about you)\b/)) {

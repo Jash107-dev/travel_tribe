@@ -366,7 +366,20 @@ def leave_trip(request, trip_id):
     else:
         messages.info(request, "You're not part of this trip.")
     
-    return redirect('trip_feed')
+    return redirect('my_trips')
+
+
+@login_required
+def my_trips(request):
+    """View all trips the user has joined"""
+    joined_trips = TripPost.objects.filter(joined_members=request.user).order_by('-created_at')
+    created_trips = TripPost.objects.filter(user=request.user).order_by('-created_at')
+    
+    context = {
+        'joined_trips': joined_trips,
+        'created_trips': created_trips,
+    }
+    return render(request, 'main/my_trips.html', context)
 
 
 

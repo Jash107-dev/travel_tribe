@@ -56,6 +56,22 @@
   border: 2px solid white;
 }
 
+.chatbot-text {
+  position: absolute;
+  bottom: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  color: #2563eb;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 2px solid #10b981;
+}
+
 /* Chatbot Window */
 .chatbot-window {
   position: absolute;

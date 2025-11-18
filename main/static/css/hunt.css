@@ -72,36 +72,7 @@
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-.popular-searches {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: center;
-}
 
-.popular-searches span {
-  color: #666;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.popular-tag {
-  padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);
-  color: white;
-  border: none;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
-}
-
-.popular-tag:hover {
-  background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.5);
-}
 
 #huntResults {
   display: none;
@@ -276,9 +247,5 @@
 
   .hunt-results-grid {
     grid-template-columns: 1fr;
-  }
-
-  .popular-searches {
-    justify-content: center;
   }
 }

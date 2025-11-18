@@ -11,7 +11,7 @@
       foods: [{ name: 'Tirupati Laddu', desc: 'Temple prasadam' }, { name: 'Pulihora', desc: 'Tamarind rice' }, { name: 'Pongal', desc: 'Rice lentil dish' }, { name: 'Vada', desc: 'Lentil fritters' }, { name: 'Dosa', desc: 'Rice crepe' }, { name: 'Idli', desc: 'Steamed cakes' }, { name: 'Sambar', desc: 'Lentil stew' }, { name: 'Coconut Chutney', desc: 'Side dish' }]},
     'hyderabad': { name: 'Hyderabad', state: 'Telangana', places: [
       { name: 'Charminar', desc: 'Iconic monument' }, { name: 'Golconda Fort', desc: 'Historic fort' }, { name: 'Hussain Sagar', desc: 'Buddha statue lake' }, { name: 'Ramoji Film City', desc: 'Largest studio' }, { name: 'Salar Jung Museum', desc: 'Art museum' }, { name: 'Chowmahalla Palace', desc: 'Nizam palace' }, { name: 'Birla Mandir', desc: 'Marble temple' }, { name: 'Nehru Zoo', desc: 'Wildlife park' }],
-      foods: [{ name: 'Hyderabadi Biryani', desc: 'Famous rice dish' }, { name: 'Haleem', desc: 'Meat wheat stew' }, { name: 'Mirchi Ka Salan', desc: 'Chili curry' }, { name: 'Double Ka Meetha', desc: 'Bread pudding' }, { name: 'Osmania Biscuits', desc: 'Tea biscuits' }, { name: 'Irani Chai', desc: 'Strong tea' }, { name: 'Lukhmi', desc: 'Meat pastry' }, { name: 'Qubani Ka Meetha', desc: 'Apricot dessert' }]},
+      foods: [{ name: 'Hyderabadi Biryani', desc: 'Famous rice dish' }, { name: 'Haleem', desc: 'Meat wheat stew' }, { name: 'mundi', desc: 'authentic arabian style mundi'}, { name: 'Double Ka Meetha', desc: 'Bread pudding' }, { name: 'Osmania Biscuits', desc: 'Tea biscuits' }, { name: 'Irani Chai', desc: 'Strong tea' }, { name: 'Lukhmi', desc: 'Meat pastry' }, { name: 'Qubani Ka Meetha', desc: 'Apricot dessert' },{ name: 'arabian grill mundi', desc: 'mundi with grill chicken ,luckys biriyani kompally' }]},
     
     // HIMACHAL PRADESH
     'manali': { name: 'Manali', state: 'Himachal Pradesh', places: [
@@ -171,16 +171,8 @@
   function initHunt() {
     const searchInput = document.getElementById('huntSearchInput');
     const resultsDiv = document.getElementById('huntResults');
-    const popularTags = document.querySelectorAll('.popular-tag');
     if (!searchInput || !resultsDiv) return;
     searchInput.addEventListener('input', debounce(performSearch, 300));
-    popularTags.forEach(tag => {
-      tag.addEventListener('click', () => {
-        const destination = tag.textContent.trim();
-        searchInput.value = destination;
-        performSearch();
-      });
-    });
     function performSearch() {
       const query = searchInput.value.trim().toLowerCase();
       if (query.length < 2) {

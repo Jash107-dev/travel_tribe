@@ -3,7 +3,7 @@
 <div id="chatbot-container" class="chatbot-container" data-perry-img="{% static 'img/perry_chatbot.jpg' %}">
   <div id="chatbot-toggle" class="chatbot-toggle">
     <img src="{% static 'img/perry_chatbot.jpg' %}" alt="AI Assistant" class="chatbot-toggle-img">
-    <span class="chatbot-badge">AI</span>
+    <span class="chatbot-text">Where do you want to go?</span>
   </div>
   
   <div id="chatbot-window" class="chatbot-window">
@@ -28,27 +28,29 @@
           <img src="{% static 'img/perry_chatbot.jpg' %}" alt="AI Assistant" class="message-avatar-img">
         </div>
         <div class="message-content">
-          <p>👋 Hi! I'm your Travel Tribe Assistant. I can help you with:</p>
+          <p>👋 Hi! I'm Perry, your Travel Tribe Assistant!</p>
+          <p><strong>Ask me anything:</strong></p>
           <ul>
-            <li>🗺️ Finding trips and destinations</li>
-            <li>👥 Joining travel tribes</li>
-            <li>📅 Trip planning tips</li>
-            <li>❓ Answering questions about the platform</li>
+            <li>🗺️ "Tell me about Goa" - Get destination info</li>
+            <li>🍽️ "Food in Vizag" - Discover local cuisine</li>
+            <li>💰 "How to book a trip?" - Platform help</li>
+            <li>🏖️ "Best time to visit Manali" - Travel tips</li>
+            <li>👥 "How does it work?" - Learn about tribes</li>
           </ul>
-          <p>What would you like to know?</p>
+          <p>Where do you want to go? 🌍</p>
         </div>
       </div>
     </div>
     
     <div class="chatbot-quick-actions">
-      <button class="quick-action-btn" data-question="What trips are available?">
-        <i class="fas fa-map-marked-alt"></i> Available Trips
+      <button class="quick-action-btn" data-question="How does it work?">
+        <i class="fas fa-question-circle"></i> How It Works
       </button>
-      <button class="quick-action-btn" data-question="How do I join a tribe?">
-        <i class="fas fa-users"></i> Join Tribe
+      <button class="quick-action-btn" data-question="Tell me about Goa">
+        <i class="fas fa-map-marked-alt"></i> Destinations
       </button>
-      <button class="quick-action-btn" data-question="Tell me about popular destinations">
-        <i class="fas fa-star"></i> Popular Places
+      <button class="quick-action-btn" data-question="Is it free?">
+        <i class="fas fa-dollar-sign"></i> Pricing
       </button>
     </div>
     

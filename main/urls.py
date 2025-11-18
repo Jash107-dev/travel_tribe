@@ -31,6 +31,7 @@ urlpatterns = [
     
     # User Profile
     path('profile/', views.user_profile, name='user_profile'),
+    path('my-trips/', views.my_trips, name='my_trips'),
     
     # Join/Leave Destination Trips
     path('join-destination-trip/<int:trip_id>/', views.join_destination_trip, name='join_destination_trip'),
