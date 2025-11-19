@@ -66,6 +66,31 @@ class Trip(models.Model):
         except JoinRequest.DoesNotExist:
             print(f"WARNING: Attempted to add {user.username} to {self.destination} without approved request!")
             return False
+    
+    def save(self, *args, **kwargs):
+        """Override save to prevent unauthorized member additions"""
+        # Store original members before save
+        if self.pk:
+            original_members = set(self.joined_members.all())
+        else:
+            original_members = set()
+        
+        super().save(*args, **kwargs)
+        
+        # Check if any unauthorized members were added
+        if self.pk:
+            current_members = set(self.joined_members.all())
+            new_members = current_members - original_members
+            
+            for member in new_members:
+                if member != self.created_by:  # Allow trip creator
+                    # Check if they have approved request
+                    try:
+                        JoinRequest.objects.get(trip=self, user=member, status='approved')
+                    except JoinRequest.DoesNotExist:
+                        # Remove unauthorized member
+                        self.joined_members.remove(member)
+                        print(f"🚫 BLOCKED: Removed {member.username} from {self.destination} - no approved request!")
 
 
 # ------------------------------------------------
