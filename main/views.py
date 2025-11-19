@@ -105,9 +105,28 @@ def add_trip(request):
 def trip_detail(request, trip_id):
     trip = get_object_or_404(Trip, id=trip_id)
     images = TripImage.objects.filter(trip=trip)
+    
+    # Get join request status for current user
+    join_request_status = None
+    pending_requests_count = 0
+    
+    if request.user.is_authenticated:
+        # Check if user has a join request
+        try:
+            join_request = JoinRequest.objects.get(trip=trip, user=request.user)
+            join_request_status = join_request.status
+        except JoinRequest.DoesNotExist:
+            join_request_status = None
+        
+        # Count pending requests if user is trip creator
+        if request.user == trip.created_by:
+            pending_requests_count = JoinRequest.objects.filter(trip=trip, status='pending').count()
+    
     return render(request, 'main/trip_detail.html', {
         'trip': trip,
         'images': images,
+        'join_request_status': join_request_status,
+        'pending_requests_count': pending_requests_count,
     })
 
 
