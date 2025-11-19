@@ -290,6 +290,7 @@ body {
 .chat-footer .icon-btn {
   background: #F0F0F0;
   color: #7F8C8D;
+  flex-shrink: 0;
 }
 
 .chat-footer .icon-btn:hover {
@@ -300,6 +301,9 @@ body {
 .send-btn {
   width: 50px;
   height: 50px;
+  min-width: 50px;
+  min-height: 50px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: linear-gradient(135deg, #FF6B35 0%, #E85A2A 100%);
   border: none;
@@ -359,6 +363,8 @@ body {
   .send-btn {
     width: 45px;
     height: 45px;
+    min-width: 45px;
+    min-height: 45px;
   }
 }
 

@@ -332,13 +332,35 @@
         // Mark as read when page loads and when user sends a message
         markAsRead();
         
+        // Clear notification badge immediately when chat opens
+        // Trigger badge refresh after marking as read
+        setTimeout(() => {
+            if (typeof window.fetchUnreadCount === 'function') {
+                window.fetchUnreadCount();
+            }
+        }, 1000);
+        
         // Mark as read periodically while user is on the page
-        setInterval(markAsRead, 10000);
+        const readInterval = setInterval(markAsRead, 10000);
+        
+        // Also refresh badge periodically
+        const badgeInterval = setInterval(() => {
+            if (typeof window.fetchUnreadCount === 'function') {
+                window.fetchUnreadCount();
+            }
+        }, 10000);
         
         // Stop polling when user leaves the page
         window.addEventListener('beforeunload', () => {
             isPolling = false;
             clearInterval(pollInterval);
+            clearInterval(readInterval);
+            clearInterval(badgeInterval);
+            
+            // Final badge refresh when leaving
+            if (typeof window.fetchUnreadCount === 'function') {
+                window.fetchUnreadCount();
+            }
         });
         
         // Resume polling when user returns to the page

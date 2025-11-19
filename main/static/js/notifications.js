@@ -151,7 +151,15 @@
                 fetchUnreadCount();
             }
         });
+        
+        // Fetch when user navigates back to the page
+        window.addEventListener('focus', () => {
+            fetchUnreadCount();
+        });
     }
+    
+    // Expose fetchUnreadCount globally for chat pages to trigger
+    window.fetchUnreadCount = fetchUnreadCount;
     
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
