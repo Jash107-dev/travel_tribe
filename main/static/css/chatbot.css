@@ -5,7 +5,7 @@
 .chatbot-container {
   position: fixed;
   bottom: 100px;
-  right: 30px;
+  right: 50px;
   z-index: 9999;
   font-family: 'Inter', sans-serif;
 }
@@ -76,7 +76,7 @@
 .chatbot-window {
   position: absolute;
   bottom: 80px;
-  right: 0;
+  right: -10px;
   width: 380px;
   height: 550px;
   background: white;
