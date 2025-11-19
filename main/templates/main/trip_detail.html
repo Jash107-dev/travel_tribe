@@ -1,5 +1,6 @@
 {% extends 'main/base.html' %}
 {% load static %}
+{% load main_extras %}
 
 {% block title %}{{ trip.destination }} - Travel Tribe{% endblock %}
 
@@ -293,10 +294,9 @@
           <div class="card-actions">
             {% if user == trip.created_by %}
               <!-- Trip Creator Actions -->
+              {% get_pending_requests_count trip as pending_count %}
               <a href="{% url 'manage_join_requests' trip.id %}" class="btn btn-primary btn-full">
                 <i class="fas fa-clipboard-list"></i> Manage Requests
-                {% load main_extras %}
-                {% get_pending_requests_count trip as pending_count %}
                 {% if pending_count > 0 %}
                   <span style="background: #ef4444; color: white; border-radius: 50%; padding: 2px 8px; font-size: 12px; margin-left: 0.5rem;">{{ pending_count }}</span>
                 {% endif %}
@@ -313,7 +313,6 @@
                   <i class="fas fa-lock"></i> Trip Full
                 </button>
               {% else %}
-                {% load main_extras %}
                 {% get_join_request_status trip user as request_status %}
                 {% if request_status == 'pending' %}
                   <button class="btn btn-full" disabled style="opacity: 0.7; background: #f59e0b;">
