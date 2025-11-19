@@ -59,6 +59,44 @@ class Trip(models.Model):
 
 
 # ------------------------------------------------
+# 🔔 Join Request Model (Trip Approval System)
+# ------------------------------------------------
+class JoinRequest(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+    
+    trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name='join_requests')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='trip_join_requests')
+    message = models.TextField(blank=True, help_text="Optional message to trip creator")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ('trip', 'user')  # One request per user per trip
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.user.username} → {self.trip.destination} ({self.status})"
+    
+    def approve(self):
+        """Approve the join request and add user to trip"""
+        self.status = 'approved'
+        self.save()
+        self.trip.joined_members.add(self.user)
+        # Award points
+        self.user.profile.add_points(30)
+    
+    def reject(self):
+        """Reject the join request"""
+        self.status = 'rejected'
+        self.save()
+
+
+# ------------------------------------------------
 # 📸 Extra Images for Trip (Gallery Section)
 # ------------------------------------------------
 class TripImage(models.Model):

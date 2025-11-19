@@ -7,7 +7,7 @@ from django.conf import settings
 from django.utils.crypto import get_random_string
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from .models import Trip, TripImage, PasswordResetOTP, TripPost, ChatRoom, ChatMessage, UserProfile
+from .models import Trip, TripImage, PasswordResetOTP, TripPost, ChatRoom, ChatMessage, UserProfile, JoinRequest, TripReview
 from .forms import TripForm, UserRegisterForm, ForgotPasswordForm, OTPVerifyForm, TripPostForm, UserProfileForm
 from django.http import JsonResponse
 from django.db import models
@@ -411,8 +411,13 @@ def user_profile(request):
 
 @login_required
 def join_destination_trip(request, trip_id):
-    """Allow users to join destination trips from home page"""
+    """Send join request for destination trip"""
     trip = get_object_or_404(Trip, id=trip_id)
+    
+    # Check if user is the trip creator
+    if request.user == trip.created_by:
+        messages.info(request, "You are the creator of this trip.")
+        return redirect('trip_detail', trip_id=trip.id)
     
     # Check if user is already a member
     if request.user in trip.joined_members.all():
@@ -424,10 +429,30 @@ def join_destination_trip(request, trip_id):
         messages.warning(request, "This trip is already full.")
         return redirect('trip_detail', trip_id=trip.id)
     
-    # Add user to trip
-    trip.joined_members.add(request.user)
-    messages.success(request, f"You joined {trip.destination} trip!")
-    return redirect('trip_detail', trip_id=trip.id)
+    # Check if request already exists
+    from main.models import JoinRequest
+    existing_request = JoinRequest.objects.filter(trip=trip, user=request.user).first()
+    
+    if existing_request:
+        if existing_request.status == 'pending':
+            messages.info(request, "Your join request is pending approval.")
+        elif existing_request.status == 'rejected':
+            messages.warning(request, "Your previous request was rejected.")
+        return redirect('trip_detail', trip_id=trip.id)
+    
+    # Create join request
+    if request.method == 'POST':
+        message = request.POST.get('message', '')
+        JoinRequest.objects.create(
+            trip=trip,
+            user=request.user,
+            message=message
+        )
+        messages.success(request, f"Join request sent to {trip.created_by.username}!")
+        return redirect('trip_detail', trip_id=trip.id)
+    
+    # Show request form
+    return render(request, 'main/join_request_form.html', {'trip': trip})
 
 
 @login_required
@@ -442,6 +467,88 @@ def leave_destination_trip(request, trip_id):
         messages.info(request, "You're not part of this trip.")
     
     return redirect('trip_detail', trip_id=trip.id)
+
+
+@login_required
+def manage_join_requests(request, trip_id):
+    """View and manage join requests for a trip (creator only)"""
+    from main.models import JoinRequest
+    trip = get_object_or_404(Trip, id=trip_id)
+    
+    # Only trip creator can manage requests
+    if request.user != trip.created_by:
+        messages.error(request, "Only the trip creator can manage join requests.")
+        return redirect('trip_detail', trip_id=trip.id)
+    
+    pending_requests = JoinRequest.objects.filter(trip=trip, status='pending')
+    approved_requests = JoinRequest.objects.filter(trip=trip, status='approved')
+    rejected_requests = JoinRequest.objects.filter(trip=trip, status='rejected')
+    
+    context = {
+        'trip': trip,
+        'pending_requests': pending_requests,
+        'approved_requests': approved_requests,
+        'rejected_requests': rejected_requests,
+    }
+    return render(request, 'main/manage_requests.html', context)
+
+
+@login_required
+def approve_join_request(request, request_id):
+    """Approve a join request"""
+    from main.models import JoinRequest
+    join_request = get_object_or_404(JoinRequest, id=request_id)
+    
+    # Only trip creator can approve
+    if request.user != join_request.trip.created_by:
+        messages.error(request, "You don't have permission to approve this request.")
+        return redirect('home')
+    
+    # Check if trip is full
+    if join_request.trip.is_full():
+        messages.warning(request, "Trip is full. Cannot approve more members.")
+        return redirect('manage_join_requests', trip_id=join_request.trip.id)
+    
+    join_request.approve()
+    messages.success(request, f"Approved {join_request.user.username}'s request!")
+    return redirect('manage_join_requests', trip_id=join_request.trip.id)
+
+
+@login_required
+def reject_join_request(request, request_id):
+    """Reject a join request"""
+    from main.models import JoinRequest
+    join_request = get_object_or_404(JoinRequest, id=request_id)
+    
+    # Only trip creator can reject
+    if request.user != join_request.trip.created_by:
+        messages.error(request, "You don't have permission to reject this request.")
+        return redirect('home')
+    
+    join_request.reject()
+    messages.success(request, f"Rejected {join_request.user.username}'s request.")
+    return redirect('manage_join_requests', trip_id=join_request.trip.id)
+
+
+@login_required
+def view_requester_profile(request, user_id):
+    """View profile of user who requested to join"""
+    user = get_object_or_404(User, id=user_id)
+    profile = user.profile
+    
+    # Get user's trip history
+    created_trips = Trip.objects.filter(created_by=user)
+    joined_trips = user.joined_destination_trips.all()
+    reviews = TripReview.objects.filter(user=user)
+    
+    context = {
+        'profile_user': user,
+        'profile': profile,
+        'created_trips': created_trips,
+        'joined_trips': joined_trips,
+        'reviews': reviews,
+    }
+    return render(request, 'main/requester_profile.html', context)
 
 
 # ===================================================================

@@ -1,0 +1,393 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Manage Join Requests - {{ trip.destination }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home_modern.css' %}">
+<style>
+.manage-header {
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    color: white;
+    padding: 2rem 0;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.manage-header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.trip-summary {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.requests-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.tab-btn {
+    padding: 1rem 2rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.request-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.request-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.request-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.requester-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.requester-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.requester-details h3 {
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.requester-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.request-time {
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+.request-message {
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    color: #475569;
+    font-style: italic;
+}
+
+.request-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-view {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.btn-view:hover {
+    background: #e2e8f0;
+}
+
+.btn-approve {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.btn-approve:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-reject {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+
+.btn-reject:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #94a3b8;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.status-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-approved {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-rejected {
+    background: #fee2e2;
+    color: #991b1b;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="manage-header">
+    <div class="container">
+        <h1><i class="fas fa-clipboard-list"></i> Manage Join Requests</h1>
+        <p>{{ trip.destination }}</p>
+    </div>
+</div>
+
+<section style="padding: 2rem 0;">
+    <div class="container">
+        <div class="trip-summary">
+            <div>
+                <h3>{{ trip.destination }}</h3>
+                <p style="color: #64748b;">{{ trip.start_date|date:"M d" }} - {{ trip.end_date|date:"M d, Y" }}</p>
+            </div>
+            <div style="text-align: right;">
+                <h3 style="color: #2563eb;">{{ trip.members_count }}/{{ trip.members_limit }}</h3>
+                <p style="color: #64748b;">Members</p>
+            </div>
+        </div>
+
+        <div class="requests-tabs">
+            <button class="tab-btn active" onclick="switchTab('pending')">
+                <i class="fas fa-clock"></i> Pending ({{ pending_requests.count }})
+            </button>
+            <button class="tab-btn" onclick="switchTab('approved')">
+                <i class="fas fa-check-circle"></i> Approved ({{ approved_requests.count }})
+            </button>
+            <button class="tab-btn" onclick="switchTab('rejected')">
+                <i class="fas fa-times-circle"></i> Rejected ({{ rejected_requests.count }})
+            </button>
+        </div>
+
+        <!-- Pending Requests -->
+        <div id="pending-tab" class="tab-content active">
+            {% if pending_requests %}
+                {% for request in pending_requests %}
+                <div class="request-card">
+                    <div class="request-header">
+                        <div class="requester-info">
+                            <div class="requester-avatar">
+                                {% if request.user.profile.profile_picture %}
+                                    <img src="{{ request.user.profile.profile_picture.url }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                {% else %}
+                                    <i class="fas fa-user"></i>
+                                {% endif %}
+                            </div>
+                            <div class="requester-details">
+                                <h3>{{ request.user.username }}</h3>
+                                <div class="requester-stats">
+                                    <span><i class="fas fa-trophy"></i> Level {{ request.user.profile.level }}</span>
+                                    <span><i class="fas fa-star"></i> {{ request.user.profile.points }} pts</span>
+                                    <span><i class="fas fa-suitcase"></i> {{ request.user.profile.total_trips }} trips</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="request-time">
+                            {{ request.created_at|timesince }} ago
+                        </div>
+                    </div>
+
+                    {% if request.message %}
+                    <div class="request-message">
+                        <i class="fas fa-quote-left"></i> {{ request.message }}
+                    </div>
+                    {% endif %}
+
+                    <div class="request-actions">
+                        <a href="{% url 'view_requester_profile' request.user.id %}" class="btn btn-view" target="_blank">
+                            <i class="fas fa-user"></i> View Profile
+                        </a>
+                        <a href="{% url 'approve_join_request' request.id %}" class="btn btn-approve" onclick="return confirm('Approve {{ request.user.username }}?')">
+                            <i class="fas fa-check"></i> Approve
+                        </a>
+                        <a href="{% url 'reject_join_request' request.id %}" class="btn btn-reject" onclick="return confirm('Reject {{ request.user.username }}?')">
+                            <i class="fas fa-times"></i> Reject
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <h3>No Pending Requests</h3>
+                    <p>You don't have any pending join requests at the moment.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Approved Requests -->
+        <div id="approved-tab" class="tab-content">
+            {% if approved_requests %}
+                {% for request in approved_requests %}
+                <div class="request-card">
+                    <div class="request-header">
+                        <div class="requester-info">
+                            <div class="requester-avatar">
+                                {% if request.user.profile.profile_picture %}
+                                    <img src="{{ request.user.profile.profile_picture.url }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                {% else %}
+                                    <i class="fas fa-user"></i>
+                                {% endif %}
+                            </div>
+                            <div class="requester-details">
+                                <h3>{{ request.user.username }}</h3>
+                                <span class="status-badge status-approved">
+                                    <i class="fas fa-check-circle"></i> Approved
+                                </span>
+                            </div>
+                        </div>
+                        <div class="request-time">
+                            Approved {{ request.updated_at|timesince }} ago
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-user-check"></i>
+                    <h3>No Approved Requests</h3>
+                    <p>You haven't approved any requests yet.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Rejected Requests -->
+        <div id="rejected-tab" class="tab-content">
+            {% if rejected_requests %}
+                {% for request in rejected_requests %}
+                <div class="request-card">
+                    <div class="request-header">
+                        <div class="requester-info">
+                            <div class="requester-avatar">
+                                {% if request.user.profile.profile_picture %}
+                                    <img src="{{ request.user.profile.profile_picture.url }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                {% else %}
+                                    <i class="fas fa-user"></i>
+                                {% endif %}
+                            </div>
+                            <div class="requester-details">
+                                <h3>{{ request.user.username }}</h3>
+                                <span class="status-badge status-rejected">
+                                    <i class="fas fa-times-circle"></i> Rejected
+                                </span>
+                            </div>
+                        </div>
+                        <div class="request-time">
+                            Rejected {{ request.updated_at|timesince }} ago
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-user-times"></i>
+                    <h3>No Rejected Requests</h3>
+                    <p>You haven't rejected any requests.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div style="margin-top: 2rem; text-align: center;">
+            <a href="{% url 'trip_detail' trip.id %}" class="btn btn-view">
+                <i class="fas fa-arrow-left"></i> Back to Trip
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    document.getElementById(tabName + '-tab').classList.add('active');
+    event.target.classList.add('active');
+}
+</script>
+{% endblock %}

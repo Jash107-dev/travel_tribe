@@ -291,19 +291,43 @@
 
           {% if user.is_authenticated %}
           <div class="card-actions">
-            {% if user in trip.joined_members.all %}
+            {% if user == trip.created_by %}
+              <!-- Trip Creator Actions -->
+              <a href="{% url 'manage_join_requests' trip.id %}" class="btn btn-primary btn-full">
+                <i class="fas fa-clipboard-list"></i> Manage Requests
+                {% load main_extras %}
+                {% get_pending_requests_count trip as pending_count %}
+                {% if pending_count > 0 %}
+                  <span style="background: #ef4444; color: white; border-radius: 50%; padding: 2px 8px; font-size: 12px; margin-left: 0.5rem;">{{ pending_count }}</span>
+                {% endif %}
+              </a>
+            {% elif user in trip.joined_members.all %}
+              <!-- Member Actions -->
               <a href="{% url 'leave_destination_trip' trip.id %}" class="btn btn-secondary btn-full">
                 <i class="fas fa-sign-out-alt"></i> Leave Trip
               </a>
             {% else %}
+              <!-- Non-member Actions -->
               {% if trip.is_full %}
                 <button class="btn btn-full" disabled style="opacity: 0.5;">
                   <i class="fas fa-lock"></i> Trip Full
                 </button>
               {% else %}
-                <a href="{% url 'join_destination_trip' trip.id %}" class="btn btn-primary btn-full">
-                  <i class="fas fa-user-plus"></i> Join Trip
-                </a>
+                {% load main_extras %}
+                {% get_join_request_status trip user as request_status %}
+                {% if request_status == 'pending' %}
+                  <button class="btn btn-full" disabled style="opacity: 0.7; background: #f59e0b;">
+                    <i class="fas fa-clock"></i> Request Pending
+                  </button>
+                {% elif request_status == 'rejected' %}
+                  <button class="btn btn-full" disabled style="opacity: 0.7; background: #ef4444;">
+                    <i class="fas fa-times-circle"></i> Request Rejected
+                  </button>
+                {% else %}
+                  <a href="{% url 'join_destination_trip' trip.id %}" class="btn btn-primary btn-full">
+                    <i class="fas fa-paper-plane"></i> Request to Join
+                  </a>
+                {% endif %}
               {% endif %}
             {% endif %}
           </div>

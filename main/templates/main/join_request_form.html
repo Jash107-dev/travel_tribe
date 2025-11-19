@@ -1,0 +1,158 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Request to Join - {{ trip.destination }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.request-container {
+    max-width: 600px;
+    margin: 3rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.request-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.request-header h1 {
+    color: #2563eb;
+    margin-bottom: 0.5rem;
+}
+
+.trip-info {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+.trip-info h3 {
+    color: #1e293b;
+    margin-bottom: 1rem;
+}
+
+.trip-detail {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: #64748b;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #64748b;
+}
+
+.btn-secondary:hover {
+    background: #cbd5e1;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="request-container">
+    <div class="request-header">
+        <h1><i class="fas fa-user-plus"></i> Request to Join Trip</h1>
+        <p>Send a request to the trip creator</p>
+    </div>
+
+    <div class="trip-info">
+        <h3>{{ trip.destination }}</h3>
+        <div class="trip-detail">
+            <i class="fas fa-user"></i>
+            <span>Created by {{ trip.created_by.username }}</span>
+        </div>
+        <div class="trip-detail">
+            <i class="fas fa-calendar-alt"></i>
+            <span>{{ trip.start_date|date:"M d" }} - {{ trip.end_date|date:"M d, Y" }}</span>
+        </div>
+        <div class="trip-detail">
+            <i class="fas fa-users"></i>
+            <span>{{ trip.members_count }}/{{ trip.members_limit }} members</span>
+        </div>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="message">
+                <i class="fas fa-comment"></i> Message to Trip Creator (Optional)
+            </label>
+            <textarea 
+                name="message" 
+                id="message" 
+                placeholder="Tell the trip creator why you'd like to join this trip..."
+            ></textarea>
+            <small style="color: #64748b;">Introduce yourself and share your travel interests!</small>
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'trip_detail' trip.id %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i> Send Request
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
