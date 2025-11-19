@@ -211,9 +211,9 @@
                     </div>
 
                     <div class="trip-card-actions">
-                        <a href="{% url 'chat_room' trip.id %}" class="btn btn-primary btn-sm" style="flex: 1; position: relative;" data-trip-id="{{ trip.id }}">
+                        <a href="{% url 'chat_room' trip.id %}" class="btn btn-primary btn-sm" style="flex: 1; position: relative; overflow: visible;" data-trip-id="{{ trip.id }}">
                             <i class="fas fa-comments"></i> Open Chat
-                            <span class="unread-badge" style="display: none; position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; padding: 2px 6px; font-size: 11px; font-weight: bold; min-width: 18px; text-align: center;"></span>
+                            <span class="unread-badge" style="display: none; position: absolute; top: -10px; right: -10px; background: #ef4444; color: white; border-radius: 50%; padding: 4px 8px; font-size: 12px; font-weight: bold; min-width: 20px; text-align: center; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4); z-index: 10;"></span>
                         </a>
                         <a href="{% url 'leave_trip' trip.id %}" class="btn-leave" onclick="return confirm('Are you sure you want to leave this trip?')">
                             <i class="fas fa-sign-out-alt"></i> Leave
@@ -271,9 +271,9 @@
                     </div>
 
                     <div class="trip-card-actions">
-                        <a href="{% url 'chat_room' trip.id %}" class="btn btn-primary btn-sm" style="flex: 1; position: relative;" data-trip-id="{{ trip.id }}">
+                        <a href="{% url 'chat_room' trip.id %}" class="btn btn-primary btn-sm" style="flex: 1; position: relative; overflow: visible;" data-trip-id="{{ trip.id }}">
                             <i class="fas fa-comments"></i> Manage Chat
-                            <span class="unread-badge" style="display: none; position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; padding: 2px 6px; font-size: 11px; font-weight: bold; min-width: 18px; text-align: center;"></span>
+                            <span class="unread-badge" style="display: none; position: absolute; top: -10px; right: -10px; background: #ef4444; color: white; border-radius: 50%; padding: 4px 8px; font-size: 12px; font-weight: bold; min-width: 20px; text-align: center; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4); z-index: 10;"></span>
                         </a>
                         <a href="{% url 'edit_trip_post' trip.id %}" class="btn btn-secondary btn-sm">
                             <i class="fas fa-edit"></i> Edit

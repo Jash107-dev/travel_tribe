@@ -61,8 +61,23 @@
 - Badge refresh every 10 seconds while on chat
 - Badge refresh when leaving chat page
 
+### 3. Badge Visibility on Open Chat Button
+**Problem:** The unread message badge on "Open Chat" button was partially hidden/cut off.
+
+**Solution:**
+- Moved badge position from `top: -8px; right: -8px` to `top: -10px; right: -10px`
+- Increased padding from `2px 6px` to `4px 8px` for better visibility
+- Increased font size from `11px` to `12px`
+- Added `overflow: visible` to parent button
+- Added `z-index: 10` to ensure badge stays on top
+- Added box shadow for better visual prominence
+
+**Files Modified:**
+- `main/templates/main/my_trips.html` - Fixed badge positioning on both "Open Chat" and "Manage Chat" buttons
+
 ## Testing
 1. Open a chat with unread messages
 2. Verify badge clears within 1-2 seconds
 3. Test on mobile - send button should remain tappable
 4. Navigate between chats - badge should update correctly
+5. Check My Trips page - unread badges should be fully visible on Open Chat buttons
