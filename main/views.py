@@ -430,20 +430,20 @@ def user_profile(request):
 
 @login_required
 def join_destination_trip(request, trip_id):
-    """Send join request for destination trip"""
+    """SECURE JOIN REQUEST SYSTEM - NO DIRECT JOINING ALLOWED"""
     trip = get_object_or_404(Trip, id=trip_id)
     
-    print(f"DEBUG: User {request.user.username} trying to join trip {trip.destination}")
-    print(f"DEBUG: Request method: {request.method}")
+    # ABSOLUTE SECURITY: Never allow direct joining
+    # This function ONLY creates join requests, NEVER adds users directly
     
     # Check if user is the trip creator
     if request.user == trip.created_by:
         messages.info(request, "You are the creator of this trip.")
         return redirect('trip_detail', trip_id=trip.id)
     
-    # Check if user is already a member
+    # Check if user is already a member (shouldn't happen with new system)
     if request.user in trip.joined_members.all():
-        messages.info(request, "You already joined this trip.")
+        messages.info(request, "You are already a member of this trip.")
         return redirect('trip_detail', trip_id=trip.id)
     
     # Check if trip is full
@@ -452,25 +452,29 @@ def join_destination_trip(request, trip_id):
         return redirect('trip_detail', trip_id=trip.id)
     
     # Check if request already exists
-    from main.models import JoinRequest
     existing_request = JoinRequest.objects.filter(trip=trip, user=request.user).first()
     
     if existing_request:
         if existing_request.status == 'pending':
-            messages.info(request, "Your join request is pending approval.")
+            messages.warning(request, f"Your join request is still pending. Wait for {trip.created_by.username} to approve it.")
         elif existing_request.status == 'rejected':
-            messages.warning(request, "Your previous request was rejected.")
+            messages.error(request, "Your previous request was rejected by the trip creator.")
+        elif existing_request.status == 'approved':
+            messages.info(request, "Your request was approved! You should already be a member.")
         return redirect('trip_detail', trip_id=trip.id)
     
-    # ALWAYS create join request - no direct joining allowed
+    # Handle form submission
     if request.method == 'POST':
-        message = request.POST.get('message', '')
-        JoinRequest.objects.create(
+        message = request.POST.get('message', '').strip()
+        
+        # Create the join request
+        join_request = JoinRequest.objects.create(
             trip=trip,
             user=request.user,
             message=message
         )
-        messages.success(request, f"Join request sent to {trip.created_by.username}! Wait for approval.")
+        
+        messages.success(request, f"🎯 Join request sent to {trip.created_by.username}! You'll be notified when they respond.")
         return redirect('trip_detail', trip_id=trip.id)
     
     # Show request form for GET requests

@@ -93,12 +93,21 @@ class JoinRequest(models.Model):
         return f"{self.user.username} → {self.trip.destination} ({self.status})"
     
     def approve(self):
-        """Approve the join request and add user to trip"""
+        """ONLY WAY TO JOIN A TRIP - Approve the join request and add user to trip"""
+        if self.status != 'pending':
+            return False
+            
         self.status = 'approved'
         self.save()
+        
+        # Add user to trip (ONLY place this should happen)
         self.trip.joined_members.add(self.user)
+        
         # Award points
         self.user.profile.add_points(30)
+        
+        print(f"✅ APPROVED: {self.user.username} joined {self.trip.destination}")
+        return True
     
     def reject(self):
         """Reject the join request"""
