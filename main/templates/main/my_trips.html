@@ -349,5 +349,17 @@ updateUnreadBadges();
 
 // Update badges every 10 seconds
 setInterval(updateUnreadBadges, 10000);
+
+// Update badges when page becomes visible (user returns from chat)
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+        updateUnreadBadges();
+    }
+});
+
+// Update badges when window gains focus (user returns from chat)
+window.addEventListener('focus', () => {
+    updateUnreadBadges();
+});
 </script>
 {% endblock %}
