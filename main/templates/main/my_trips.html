@@ -211,8 +211,9 @@
                     </div>
 
                     <div class="trip-card-actions">
-                        <a href="{% url 'chat_room' trip.id %}" class="btn btn-primary btn-sm" style="flex: 1;">
+                        <a href="{% url 'chat_room' trip.id %}" class="btn btn-primary btn-sm" style="flex: 1; position: relative;" data-trip-id="{{ trip.id }}">
                             <i class="fas fa-comments"></i> Open Chat
+                            <span class="unread-badge" style="display: none; position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; padding: 2px 6px; font-size: 11px; font-weight: bold; min-width: 18px; text-align: center;"></span>
                         </a>
                         <a href="{% url 'leave_trip' trip.id %}" class="btn-leave" onclick="return confirm('Are you sure you want to leave this trip?')">
                             <i class="fas fa-sign-out-alt"></i> Leave
@@ -270,8 +271,9 @@
                     </div>
 
                     <div class="trip-card-actions">
-                        <a href="{% url 'chat_room' trip.id %}" class="btn btn-primary btn-sm" style="flex: 1;">
+                        <a href="{% url 'chat_room' trip.id %}" class="btn btn-primary btn-sm" style="flex: 1; position: relative;" data-trip-id="{{ trip.id }}">
                             <i class="fas fa-comments"></i> Manage Chat
+                            <span class="unread-badge" style="display: none; position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; padding: 2px 6px; font-size: 11px; font-weight: bold; min-width: 18px; text-align: center;"></span>
                         </a>
                         <a href="{% url 'edit_trip_post' trip.id %}" class="btn btn-secondary btn-sm">
                             <i class="fas fa-edit"></i> Edit
@@ -314,5 +316,38 @@ function switchTab(tabName) {
     // Activate button
     event.target.classList.add('active');
 }
+
+// ===================================================================
+// 🔔 UPDATE UNREAD BADGES ON MY TRIPS PAGE
+// ===================================================================
+
+async function updateUnreadBadges() {
+    try {
+        const response = await fetch('/api/notifications/unread/');
+        const data = await response.json();
+        
+        // Update badges for each trip
+        document.querySelectorAll('[data-trip-id]').forEach(chatLink => {
+            const tripId = chatLink.getAttribute('data-trip-id');
+            const badge = chatLink.querySelector('.unread-badge');
+            
+            if (data.trips && data.trips[tripId]) {
+                const count = data.trips[tripId].count;
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        });
+    } catch (error) {
+        console.error('Error updating unread badges:', error);
+    }
+}
+
+// Update badges on page load
+updateUnreadBadges();
+
+// Update badges every 10 seconds
+setInterval(updateUnreadBadges, 10000);
 </script>
 {% endblock %}

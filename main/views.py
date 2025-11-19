@@ -10,6 +10,7 @@ from django.utils import timezone
 from .models import Trip, TripImage, PasswordResetOTP, TripPost, ChatRoom, ChatMessage, UserProfile
 from .forms import TripForm, UserRegisterForm, ForgotPasswordForm, OTPVerifyForm, TripPostForm, UserProfileForm
 from django.http import JsonResponse
+from django.db import models
 
 # ===================================================================
 # 🧍 USER AUTHENTICATION
@@ -441,3 +442,304 @@ def leave_destination_trip(request, trip_id):
         messages.info(request, "You're not part of this trip.")
     
     return redirect('trip_detail', trip_id=trip.id)
+
+
+# ===================================================================
+# 📡 REAL-TIME CHAT API ENDPOINTS
+# ===================================================================
+
+@login_required
+def get_new_messages(request, trip_id):
+    """API endpoint to fetch new messages for real-time updates"""
+    trip_post = get_object_or_404(TripPost, id=trip_id)
+    
+    # Check if user is part of the trip
+    if request.user != trip_post.user and request.user not in trip_post.joined_members.all():
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    # Get the last message ID from the request
+    last_message_id = request.GET.get('last_id', 0)
+    
+    try:
+        chat_room_obj = ChatRoom.objects.get(trip_post=trip_post)
+        new_messages = ChatMessage.objects.filter(
+            chat_room=chat_room_obj,
+            id__gt=last_message_id
+        ).order_by('timestamp')
+        
+        messages_data = []
+        for msg in new_messages:
+            messages_data.append({
+                'id': msg.id,
+                'user': msg.user.username,
+                'user_id': msg.user.id,
+                'content': msg.content,
+                'timestamp': msg.timestamp.strftime('%b %d, %H:%M'),
+                'is_image': msg.is_image(),
+                'is_video': msg.is_video(),
+                'media_url': msg.media_file.url if msg.media_file else None,
+            })
+        
+        return JsonResponse({
+            'messages': messages_data,
+            'count': len(messages_data)
+        })
+    except ChatRoom.DoesNotExist:
+        return JsonResponse({'messages': [], 'count': 0})
+
+
+@login_required
+def get_unread_count(request):
+    """API endpoint to get unread message count across all trips"""
+    # Get all trips the user is part of
+    user_trips = TripPost.objects.filter(
+        models.Q(user=request.user) | models.Q(joined_members=request.user)
+    ).distinct()
+    
+    # Get the last seen message ID for each trip from session
+    last_seen = request.session.get('last_seen_messages', {})
+    
+    total_unread = 0
+    trip_unread = {}
+    
+    for trip in user_trips:
+        try:
+            chat_room_obj = ChatRoom.objects.get(trip_post=trip)
+            last_seen_id = last_seen.get(str(trip.id), 0)
+            
+            # Count messages after last seen that are not from current user
+            unread = ChatMessage.objects.filter(
+                chat_room=chat_room_obj,
+                id__gt=last_seen_id
+            ).exclude(user=request.user).count()
+            
+            if unread > 0:
+                trip_unread[trip.id] = {
+                    'count': unread,
+                    'destination': trip.destination
+                }
+                total_unread += unread
+        except ChatRoom.DoesNotExist:
+            continue
+    
+    return JsonResponse({
+        'total_unread': total_unread,
+        'trips': trip_unread
+    })
+
+
+@login_required
+def mark_messages_read(request, trip_id):
+    """Mark messages as read for a specific trip"""
+    if request.method == 'POST':
+        trip_post = get_object_or_404(TripPost, id=trip_id)
+        
+        # Check if user is part of the trip
+        if request.user != trip_post.user and request.user not in trip_post.joined_members.all():
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        try:
+            chat_room_obj = ChatRoom.objects.get(trip_post=trip_post)
+            last_message = ChatMessage.objects.filter(chat_room=chat_room_obj).order_by('-id').first()
+            
+            if last_message:
+                # Store last seen message ID in session
+                last_seen = request.session.get('last_seen_messages', {})
+                last_seen[str(trip_id)] = last_message.id
+                request.session['last_seen_messages'] = last_seen
+                request.session.modified = True
+                
+                return JsonResponse({'success': True, 'last_id': last_message.id})
+        except ChatRoom.DoesNotExist:
+            pass
+    
+    return JsonResponse({'success': False})
+
+
+# ===================================================================
+# ⭐ TRIP REVIEWS & RATINGS
+# ===================================================================
+
+@login_required
+def add_review(request, trip_id):
+    """Add a review for a trip"""
+    from .models import TripReview
+    trip = get_object_or_404(Trip, id=trip_id)
+    
+    # Check if user has already reviewed this trip
+    existing_review = TripReview.objects.filter(trip=trip, user=request.user).first()
+    
+    if request.method == 'POST':
+        rating = request.POST.get('rating')
+        review_text = request.POST.get('review_text', '').strip()
+        
+        if not rating:
+            messages.error(request, "Please select a rating.")
+            return redirect('trip_detail', trip_id=trip.id)
+        
+        if existing_review:
+            # Update existing review
+            existing_review.rating = int(rating)
+            existing_review.review_text = review_text
+            existing_review.save()
+            messages.success(request, "Review updated successfully!")
+        else:
+            # Create new review
+            TripReview.objects.create(
+                trip=trip,
+                user=request.user,
+                rating=int(rating),
+                review_text=review_text
+            )
+            messages.success(request, "Review added successfully! You earned 20 points! ⭐")
+        
+        return redirect('trip_detail', trip_id=trip.id)
+    
+    return redirect('trip_detail', trip_id=trip.id)
+
+
+@login_required
+def delete_review(request, review_id):
+    """Delete a review"""
+    from .models import TripReview
+    review = get_object_or_404(TripReview, id=review_id)
+    
+    if review.user != request.user:
+        messages.error(request, "You can only delete your own reviews.")
+        return redirect('trip_detail', trip_id=review.trip.id)
+    
+    trip_id = review.trip.id
+    review.delete()
+    messages.success(request, "Review deleted successfully!")
+    return redirect('trip_detail', trip_id=trip_id)
+
+
+# ===================================================================
+# 📸 TRIP PHOTO GALLERY
+# ===================================================================
+
+@login_required
+def upload_photo(request, trip_id):
+    """Upload a photo to a trip"""
+    from .models import TripPhoto
+    trip = get_object_or_404(Trip, id=trip_id)
+    
+    if request.method == 'POST':
+        photo = request.FILES.get('photo')
+        caption = request.POST.get('caption', '').strip()
+        
+        if not photo:
+            messages.error(request, "Please select a photo to upload.")
+            return redirect('trip_detail', trip_id=trip.id)
+        
+        TripPhoto.objects.create(
+            trip=trip,
+            user=request.user,
+            photo=photo,
+            caption=caption
+        )
+        messages.success(request, "Photo uploaded successfully! You earned 10 points! 📸")
+        return redirect('trip_detail', trip_id=trip.id)
+    
+    return redirect('trip_detail', trip_id=trip.id)
+
+
+@login_required
+def delete_photo(request, photo_id):
+    """Delete a photo"""
+    from .models import TripPhoto
+    photo = get_object_or_404(TripPhoto, id=photo_id)
+    
+    if photo.user != request.user:
+        messages.error(request, "You can only delete your own photos.")
+        return redirect('trip_detail', trip_id=photo.trip.id)
+    
+    trip_id = photo.trip.id
+    photo.delete()
+    messages.success(request, "Photo deleted successfully!")
+    return redirect('trip_detail', trip_id=trip_id)
+
+
+# ===================================================================
+# 🏆 GAMIFICATION - LEADERBOARD & ACHIEVEMENTS
+# ===================================================================
+
+def leaderboard(request):
+    """Display leaderboard with top users by points"""
+    top_users = UserProfile.objects.all().order_by('-points', '-level')[:50]
+    
+    # Get current user's rank if logged in
+    user_rank = None
+    if request.user.is_authenticated:
+        user_profile = request.user.profile
+        user_rank = UserProfile.objects.filter(points__gt=user_profile.points).count() + 1
+    
+    context = {
+        'top_users': top_users,
+        'user_rank': user_rank,
+    }
+    return render(request, 'main/leaderboard.html', context)
+
+
+@login_required
+def achievements(request):
+    """Display user's achievements and badges"""
+    profile = request.user.profile
+    
+    # Define all possible achievements
+    all_achievements = [
+        {'name': 'First Trip Creator 🎉', 'description': 'Create your first trip', 'earned': 'First Trip Creator 🎉' in profile.badge_list},
+        {'name': 'Trip Master 🗺️', 'description': 'Create 5 trips', 'earned': 'Trip Master 🗺️' in profile.badge_list},
+        {'name': 'Travel Legend 🌟', 'description': 'Create 10 trips', 'earned': 'Travel Legend 🌟' in profile.badge_list},
+        {'name': 'First Reviewer ⭐', 'description': 'Write your first review', 'earned': 'First Reviewer ⭐' in profile.badge_list},
+        {'name': 'Review Expert 📝', 'description': 'Write 10 reviews', 'earned': 'Review Expert 📝' in profile.badge_list},
+        {'name': 'First Photo 📸', 'description': 'Upload your first photo', 'earned': 'First Photo 📸' in profile.badge_list},
+        {'name': 'Photographer 📷', 'description': 'Upload 20 photos', 'earned': 'Photographer 📷' in profile.badge_list},
+        {'name': 'Photo Master 🎨', 'description': 'Upload 50 photos', 'earned': 'Photo Master 🎨' in profile.badge_list},
+    ]
+    
+    context = {
+        'profile': profile,
+        'all_achievements': all_achievements,
+    }
+    return render(request, 'main/achievements.html', context)
+
+
+@login_required
+def public_profile(request, username):
+    """View another user's public profile"""
+    user = get_object_or_404(User, username=username)
+    profile = user.profile
+    
+    # Get user's trips and stats
+    created_trips = Trip.objects.filter(created_by=user).order_by('-created_at')[:5]
+    from .models import TripReview, TripPhoto
+    recent_reviews = TripReview.objects.filter(user=user).order_by('-created_at')[:5]
+    recent_photos = TripPhoto.objects.filter(user=user).order_by('-uploaded_at')[:6]
+    
+    context = {
+        'profile_user': user,
+        'profile': profile,
+        'created_trips': created_trips,
+        'recent_reviews': recent_reviews,
+        'recent_photos': recent_photos,
+    }
+    return render(request, 'main/public_profile.html', context)
+
+
+# ===================================================================
+# 🔍 HUNT FEATURE (Search Destinations)
+# ===================================================================
+
+def hunt_view(request):
+    """Hunt feature to search destinations"""
+    return render(request, 'main/hunt.html')
+
+
+# ===================================================================
+# 🤖 CHATBOT FEATURE
+# ===================================================================
+
+def chatbot_view(request):
+    """AI Travel Assistant Chatbot"""
+    return render(request, 'main/chatbot.html')

@@ -32,6 +32,82 @@
     font-size: 3rem;
     margin: 0 auto 1rem;
   }
+  
+  .profile-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: var(--bg-light);
+    border-radius: var(--radius-lg);
+  }
+  
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: var(--radius-md);
+    box-shadow: 0 2px 10px var(--shadow);
+  }
+  
+  .stat-item i {
+    font-size: 2rem;
+    color: var(--primary);
+  }
+  
+  .stat-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-dark);
+  }
+  
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--text-light);
+  }
+  
+  .badges-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: var(--bg-light);
+    border-radius: var(--radius-lg);
+  }
+  
+  .badges-section h3 {
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .badges-section h3 i {
+    color: #F7B801;
+  }
+  
+  .badges-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  
+  .badge-item {
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #F7B801 0%, #F39C12 100%);
+    color: white;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 10px rgba(247, 184, 1, 0.3);
+  }
 </style>
 {% endblock %}
 
@@ -49,6 +125,50 @@
         {% endif %}
         <h1>{{ user.username }}'s Profile</h1>
         <p style="color: var(--text-light);">{{ user.email }}</p>
+        
+        <!-- Gamification Stats -->
+        <div class="profile-stats">
+          <div class="stat-item">
+            <i class="fas fa-trophy"></i>
+            <div class="stat-info">
+              <span class="stat-value">Level {{ profile.level }}</span>
+              <span class="stat-label">Your Level</span>
+            </div>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-star"></i>
+            <div class="stat-info">
+              <span class="stat-value">{{ profile.points }}</span>
+              <span class="stat-label">Points</span>
+            </div>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-map-marked-alt"></i>
+            <div class="stat-info">
+              <span class="stat-value">{{ profile.trips_created_count }}</span>
+              <span class="stat-label">Trips Created</span>
+            </div>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-users"></i>
+            <div class="stat-info">
+              <span class="stat-value">{{ profile.trips_joined_count }}</span>
+              <span class="stat-label">Trips Joined</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Badges -->
+        {% if profile.badge_list %}
+        <div class="badges-section">
+          <h3><i class="fas fa-award"></i> Your Badges</h3>
+          <div class="badges-grid">
+            {% for badge in profile.badge_list %}
+            <div class="badge-item">{{ badge }}</div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
       </div>
 
       <form method="POST" enctype="multipart/form-data" class="modern-form">

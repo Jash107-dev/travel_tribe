@@ -1,5 +1,8 @@
 from django.contrib import admin
-from .models import Trip, TripImage, TripPost, ChatRoom, ChatMessage, PasswordResetOTP, UserProfile
+from .models import (
+    Trip, TripImage, TripPost, ChatRoom, ChatMessage, 
+    PasswordResetOTP, UserProfile, TripReview, TripPhoto, Achievement
+)
 
 # ================================================
 # TRIP MANAGEMENT
@@ -148,10 +151,10 @@ class PasswordResetOTPAdmin(admin.ModelAdmin):
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'zodiac_sign', 'location', 'mobile_number', 'created_at')
+    list_display = ('user', 'level', 'points', 'total_trips', 'location', 'created_at')
     search_fields = ('user__username', 'user__email', 'location', 'interests')
-    list_filter = ('zodiac_sign', 'created_at')
-    readonly_fields = ('created_at', 'updated_at')
+    list_filter = ('zodiac_sign', 'level', 'created_at')
+    readonly_fields = ('created_at', 'updated_at', 'trips_created_count', 'trips_joined_count', 'total_trips')
     
     fieldsets = (
         ('User', {
@@ -163,8 +166,73 @@ class UserProfileAdmin(admin.ModelAdmin):
         ('Personal Details', {
             'fields': ('zodiac_sign', 'date_of_birth', 'mobile_number', 'location')
         }),
+        ('Gamification', {
+            'fields': ('points', 'level', 'badges')
+        }),
+        ('Statistics', {
+            'fields': ('trips_created_count', 'trips_joined_count', 'total_trips'),
+            'classes': ('collapse',)
+        }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
     )
+
+
+# ================================================
+# TRIP REVIEWS
+# ================================================
+
+@admin.register(TripReview)
+class TripReviewAdmin(admin.ModelAdmin):
+    list_display = ('trip', 'user', 'rating', 'created_at')
+    search_fields = ('trip__destination', 'user__username', 'review_text')
+    list_filter = ('rating', 'created_at')
+    readonly_fields = ('created_at',)
+    
+    fieldsets = (
+        ('Review Information', {
+            'fields': ('trip', 'user', 'rating')
+        }),
+        ('Review Content', {
+            'fields': ('review_text',)
+        }),
+        ('Metadata', {
+            'fields': ('created_at',),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+# ================================================
+# TRIP PHOTOS
+# ================================================
+
+@admin.register(TripPhoto)
+class TripPhotoAdmin(admin.ModelAdmin):
+    list_display = ('trip', 'user', 'caption', 'uploaded_at')
+    search_fields = ('trip__destination', 'user__username', 'caption')
+    list_filter = ('uploaded_at',)
+    readonly_fields = ('uploaded_at',)
+    
+    fieldsets = (
+        ('Photo Information', {
+            'fields': ('trip', 'user', 'photo', 'caption')
+        }),
+        ('Metadata', {
+            'fields': ('uploaded_at',),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+# ================================================
+# ACHIEVEMENTS
+# ================================================
+
+@admin.register(Achievement)
+class AchievementAdmin(admin.ModelAdmin):
+    list_display = ('name', 'icon', 'points_required', 'description')
+    search_fields = ('name', 'description')
+    list_filter = ('points_required',)

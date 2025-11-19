@@ -476,3 +476,301 @@
   color: #FF6B35;
   margin-right: 8px;
 }
+
+
+/* ========================================
+   PHOTO GALLERY SECTION
+   ======================================== */
+
+.upload-form {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: var(--bg-light);
+  border-radius: var(--radius-md);
+}
+
+.upload-area {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.upload-area input[type="file"] {
+  padding: 0.75rem;
+  border: 2px dashed var(--primary);
+  border-radius: var(--radius-sm);
+  background: white;
+  cursor: pointer;
+}
+
+.caption-input {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+}
+
+.photo-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.photo-card {
+  background: white;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 4px 15px var(--shadow);
+  transition: var(--transition);
+}
+
+.photo-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px var(--shadow-hover);
+}
+
+.photo-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.photo-info {
+  padding: 1rem;
+  position: relative;
+}
+
+.photo-user {
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+.photo-user i {
+  color: var(--primary);
+  margin-right: 0.5rem;
+}
+
+.photo-caption {
+  color: var(--text-light);
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.photo-date {
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
+.delete-photo {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  color: #e74c3c;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.delete-photo:hover {
+  color: #c0392b;
+}
+
+.no-content {
+  text-align: center;
+  color: var(--text-light);
+  padding: 2rem;
+  font-style: italic;
+}
+
+/* ========================================
+   REVIEWS & RATINGS SECTION
+   ======================================== */
+
+.rating-summary {
+  background: var(--bg-light);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.avg-rating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rating-number {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.stars {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.stars i {
+  color: #F7B801;
+  font-size: 1.5rem;
+}
+
+.review-count {
+  color: var(--text-light);
+  font-size: 0.95rem;
+}
+
+.review-form {
+  background: var(--bg-light);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 2rem;
+}
+
+.rating-input {
+  margin-bottom: 1rem;
+}
+
+.rating-input label {
+  display: block;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+.star-rating {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+
+.star-rating input {
+  display: none;
+}
+
+.star-rating label {
+  font-size: 2rem;
+  color: #ddd;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.star-rating label:hover,
+.star-rating label:hover ~ label,
+.star-rating input:checked ~ label {
+  color: #F7B801;
+}
+
+.review-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+  margin-bottom: 1rem;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.review-item {
+  padding: 1.5rem;
+  background: var(--bg-light);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--primary);
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.reviewer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.reviewer-info strong {
+  color: var(--text-dark);
+  font-size: 1.1rem;
+}
+
+.review-stars {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.review-stars i {
+  color: #F7B801;
+  font-size: 1rem;
+}
+
+.review-date {
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+.review-text {
+  color: var(--text-dark);
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+
+.delete-review {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.delete-review:hover {
+  color: #c0392b;
+}
+
+/* ========================================
+   RESPONSIVE - PHOTOS & REVIEWS
+   ======================================== */
+
+@media (max-width: 768px) {
+  .photo-gallery {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+  
+  .upload-area {
+    gap: 0.75rem;
+  }
+  
+  .rating-number {
+    font-size: 2.5rem;
+  }
+  
+  .star-rating label {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .photo-gallery {
+    grid-template-columns: 1fr;
+  }
+  
+  .review-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

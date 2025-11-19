@@ -148,6 +148,34 @@ body {
   cursor: pointer;
 }
 
+.navbar-stats {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(10px);
+}
+
+.user-level,
+.user-points {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--white);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.user-level i {
+  color: #F7B801;
+}
+
+.user-points i {
+  color: #FFD700;
+}
+
 /* ========================================
    BUTTONS
    ======================================== */

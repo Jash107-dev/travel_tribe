@@ -36,4 +36,25 @@ urlpatterns = [
     # Join/Leave Destination Trips
     path('join-destination-trip/<int:trip_id>/', views.join_destination_trip, name='join_destination_trip'),
     path('leave-destination-trip/<int:trip_id>/', views.leave_destination_trip, name='leave_destination_trip'),
+    
+    # Real-time Chat API
+    path('api/chat/<int:trip_id>/messages/', views.get_new_messages, name='get_new_messages'),
+    path('api/notifications/unread/', views.get_unread_count, name='get_unread_count'),
+    
+    # Reviews & Ratings
+    path('trip/<int:trip_id>/review/', views.add_review, name='add_review'),
+    path('review/<int:review_id>/delete/', views.delete_review, name='delete_review'),
+    
+    # Photo Gallery
+    path('trip/<int:trip_id>/upload-photo/', views.upload_photo, name='upload_photo'),
+    path('photo/<int:photo_id>/delete/', views.delete_photo, name='delete_photo'),
+    
+    # Gamification
+    path('leaderboard/', views.leaderboard, name='leaderboard'),
+    path('achievements/', views.achievements, name='achievements'),
+    path('profile/<str:username>/', views.public_profile, name='public_profile'),
+    
+    # Hunt & Chatbot
+    path('hunt/', views.hunt_view, name='hunt'),
+    path('chatbot/', views.chatbot_view, name='chatbot'),
 ]

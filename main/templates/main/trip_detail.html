@@ -105,6 +105,131 @@
           </div>
         </div>
         {% endif %}
+
+        <!-- User Photo Gallery -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="fas fa-camera"></i>
+            <h2>Trip Photos ({{ trip.photos.count }})</h2>
+          </div>
+          
+          {% if user.is_authenticated %}
+          <form method="post" action="{% url 'upload_photo' trip.id %}" enctype="multipart/form-data" class="upload-form">
+            {% csrf_token %}
+            <div class="upload-area">
+              <input type="file" name="photo" id="photo-upload" accept="image/*" required>
+              <input type="text" name="caption" placeholder="Add a caption (optional)" class="caption-input">
+              <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-upload"></i> Upload Photo
+              </button>
+            </div>
+          </form>
+          {% endif %}
+
+          {% if trip.photos.all %}
+          <div class="photo-gallery">
+            {% for photo in trip.photos.all %}
+            <div class="photo-card">
+              <img src="{{ photo.photo.url }}" alt="{{ photo.caption }}">
+              <div class="photo-info">
+                <div class="photo-user">
+                  <i class="fas fa-user"></i> {{ photo.user.username }}
+                </div>
+                {% if photo.caption %}
+                <div class="photo-caption">{{ photo.caption }}</div>
+                {% endif %}
+                <div class="photo-date">{{ photo.uploaded_at|date:"M d, Y" }}</div>
+                {% if photo.user == user %}
+                <a href="{% url 'delete_photo' photo.id %}" class="delete-photo" onclick="return confirm('Delete this photo?')">
+                  <i class="fas fa-trash"></i>
+                </a>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="no-content">No photos yet. Be the first to share!</p>
+          {% endif %}
+        </div>
+
+        <!-- Reviews & Ratings -->
+        <div class="info-card">
+          <div class="card-header">
+            <i class="fas fa-star"></i>
+            <h2>Reviews & Ratings</h2>
+          </div>
+
+          {% if trip.reviews.all %}
+          <div class="rating-summary">
+            <div class="avg-rating">
+              <span class="rating-number">{{ trip.reviews.all|length|floatformat:1 }}</span>
+              <div class="stars">
+                {% with avg_rating=trip.reviews.all.0.rating %}
+                {% for i in "12345" %}
+                  <i class="fas fa-star"></i>
+                {% endfor %}
+                {% endwith %}
+              </div>
+              <span class="review-count">{{ trip.reviews.count }} review{{ trip.reviews.count|pluralize }}</span>
+            </div>
+          </div>
+          {% endif %}
+
+          {% if user.is_authenticated %}
+          <form method="post" action="{% url 'add_review' trip.id %}" class="review-form">
+            {% csrf_token %}
+            <div class="rating-input">
+              <label>Your Rating:</label>
+              <div class="star-rating">
+                <input type="radio" name="rating" value="5" id="star5"><label for="star5">★</label>
+                <input type="radio" name="rating" value="4" id="star4"><label for="star4">★</label>
+                <input type="radio" name="rating" value="3" id="star3"><label for="star3">★</label>
+                <input type="radio" name="rating" value="2" id="star2"><label for="star2">★</label>
+                <input type="radio" name="rating" value="1" id="star1"><label for="star1">★</label>
+              </div>
+            </div>
+            <textarea name="review_text" placeholder="Share your experience..." rows="3" class="review-textarea"></textarea>
+            <button type="submit" class="btn btn-primary btn-sm">
+              <i class="fas fa-paper-plane"></i> Submit Review
+            </button>
+          </form>
+          {% endif %}
+
+          {% if trip.reviews.all %}
+          <div class="reviews-list">
+            {% for review in trip.reviews.all %}
+            <div class="review-item">
+              <div class="review-header">
+                <div class="reviewer-info">
+                  <strong>{{ review.user.username }}</strong>
+                  <div class="review-stars">
+                    {% for i in "12345" %}
+                      {% if forloop.counter <= review.rating %}
+                        <i class="fas fa-star"></i>
+                      {% else %}
+                        <i class="far fa-star"></i>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                </div>
+                <span class="review-date">{{ review.created_at|date:"M d, Y" }}</span>
+              </div>
+              {% if review.review_text %}
+              <p class="review-text">{{ review.review_text }}</p>
+              {% endif %}
+              {% if review.user == user %}
+              <a href="{% url 'delete_review' review.id %}" class="delete-review" onclick="return confirm('Delete this review?')">
+                <i class="fas fa-trash"></i> Delete
+              </a>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="no-content">No reviews yet. Be the first to review!</p>
+          {% endif %}
+        </div>
       </div>
 
       <!-- Sidebar -->

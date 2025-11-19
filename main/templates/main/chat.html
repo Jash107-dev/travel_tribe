@@ -118,7 +118,13 @@
     <script>
         // Auto-scroll to bottom
         const messagesContainer = document.getElementById('messagesContainer');
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        const messagesWrapper = messagesContainer.querySelector('.messages-wrapper');
+        
+        function scrollToBottom() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        scrollToBottom();
 
         // Focus input on load
         document.getElementById('messageInput').focus();
@@ -151,8 +157,199 @@
             // Form will submit normally
         });
 
-        // Manual refresh button (optional - user can refresh browser to see new messages)
-        // Or implement WebSocket for real-time updates in production
+        // ===================================================================
+        // 🔄 REAL-TIME MESSAGE POLLING
+        // ===================================================================
+        
+        const tripId = {{ trip.id }};
+        const currentUserId = {{ request.user.id }};
+        let lastMessageId = 0;
+        let isPolling = true;
+        
+        // Get the last message ID from existing messages
+        const existingMessages = document.querySelectorAll('.message');
+        if (existingMessages.length > 0) {
+            // Extract ID from data attribute or use a counter
+            lastMessageId = existingMessages.length; // Fallback
+        }
+        
+        // Try to get actual last message ID from backend
+        {% if messages %}
+            {% for msg in messages %}
+                {% if forloop.last %}
+                    lastMessageId = {{ msg.id }};
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        
+        // Function to create message HTML
+        function createMessageHTML(msg) {
+            const isSent = msg.user_id === currentUserId;
+            const messageClass = isSent ? 'message-sent' : 'message-received';
+            
+            let mediaHTML = '';
+            if (msg.media_url) {
+                if (msg.is_image) {
+                    mediaHTML = `<div class="message-media">
+                        <img src="${msg.media_url}" alt="Shared image" style="max-width: 300px; border-radius: 8px; margin-top: 0.5rem;">
+                    </div>`;
+                } else if (msg.is_video) {
+                    mediaHTML = `<div class="message-media">
+                        <video controls style="max-width: 300px; border-radius: 8px; margin-top: 0.5rem;">
+                            <source src="${msg.media_url}" type="video/mp4">
+                            Your browser does not support video.
+                        </video>
+                    </div>`;
+                } else {
+                    mediaHTML = `<div class="message-media">
+                        <a href="${msg.media_url}" target="_blank" class="media-link">
+                            <i class="fas fa-file"></i> View File
+                        </a>
+                    </div>`;
+                }
+            }
+            
+            return `
+                <div class="message ${messageClass}" data-message-id="${msg.id}">
+                    <div class="message-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-author">${msg.user}</span>
+                            <span class="message-time">${msg.timestamp}</span>
+                        </div>
+                        <div class="message-bubble">
+                            ${msg.content ? msg.content : ''}
+                            ${mediaHTML}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Function to fetch new messages
+        async function fetchNewMessages() {
+            if (!isPolling) return;
+            
+            try {
+                const response = await fetch(`/api/chat/${tripId}/messages/?last_id=${lastMessageId}`);
+                const data = await response.json();
+                
+                if (data.messages && data.messages.length > 0) {
+                    // Remove empty chat message if it exists
+                    const emptyChat = messagesWrapper.querySelector('.empty-chat');
+                    if (emptyChat) {
+                        emptyChat.remove();
+                    }
+                    
+                    // Add new messages
+                    data.messages.forEach(msg => {
+                        const messageHTML = createMessageHTML(msg);
+                        messagesWrapper.insertAdjacentHTML('beforeend', messageHTML);
+                        lastMessageId = msg.id;
+                        
+                        // Show notification for messages from others
+                        if (msg.user_id !== currentUserId) {
+                            showNotification(msg.user, msg.content);
+                        }
+                    });
+                    
+                    // Scroll to bottom
+                    scrollToBottom();
+                    
+                    // Play notification sound (optional)
+                    playNotificationSound();
+                }
+            } catch (error) {
+                console.error('Error fetching messages:', error);
+            }
+        }
+        
+        // Function to show browser notification
+        function showNotification(username, message) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                const notification = new Notification(`${username} in {{ trip.destination }}`, {
+                    body: message || 'Sent a media file',
+                    icon: '{% static "img/perry_chatbot.jpg" %}',
+                    badge: '{% static "img/perry_chatbot.jpg" %}',
+                    tag: 'chat-message',
+                    requireInteraction: false
+                });
+                
+                notification.onclick = function() {
+                    window.focus();
+                    notification.close();
+                };
+                
+                setTimeout(() => notification.close(), 5000);
+            }
+        }
+        
+        // Function to play notification sound
+        function playNotificationSound() {
+            // Create a subtle notification sound
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+        
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+        
+        // Start polling for new messages every 3 seconds
+        const pollInterval = setInterval(fetchNewMessages, 3000);
+        
+        // Mark messages as read when user is viewing the chat
+        async function markAsRead() {
+            try {
+                await fetch(`/api/chat/${tripId}/mark-read/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                });
+            } catch (error) {
+                console.error('Error marking messages as read:', error);
+            }
+        }
+        
+        // Mark as read when page loads and when user sends a message
+        markAsRead();
+        
+        // Mark as read periodically while user is on the page
+        setInterval(markAsRead, 10000);
+        
+        // Stop polling when user leaves the page
+        window.addEventListener('beforeunload', () => {
+            isPolling = false;
+            clearInterval(pollInterval);
+        });
+        
+        // Resume polling when user returns to the page
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                isPolling = false;
+            } else {
+                isPolling = true;
+                fetchNewMessages();
+            }
+        });
     </script>
 </body>
 </html>
