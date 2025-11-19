@@ -1,0 +1,62 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Test Join System{% endblock %}
+
+{% block content %}
+<div style="padding: 2rem; max-width: 800px; margin: 0 auto;">
+    <h1>🧪 Join System Test</h1>
+    
+    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px; margin: 1rem 0;">
+        <h3>Current User: {{ user.username }}</h3>
+        <p>Testing join request system...</p>
+    </div>
+
+    {% if trips %}
+        {% for trip in trips %}
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; margin: 1rem 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h3>{{ trip.destination }}</h3>
+            <p><strong>Creator:</strong> {{ trip.created_by.username }}</p>
+            <p><strong>Members:</strong> {{ trip.members_count }}/{{ trip.members_limit }}</p>
+            
+            {% if user == trip.created_by %}
+                <p style="color: #10b981;">✅ You are the creator</p>
+            {% elif user in trip.joined_members.all %}
+                <p style="color: #3b82f6;">✅ You are a member</p>
+            {% else %}
+                <p style="color: #ef4444;">❌ You are NOT a member</p>
+                <a href="{% url 'join_destination_trip' trip.id %}" style="background: #2563eb; color: white; padding: 0.5rem 1rem; border-radius: 5px; text-decoration: none;">
+                    Request to Join
+                </a>
+            {% endif %}
+            
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                <strong>Join Requests:</strong>
+                {% for request in trip.join_requests.all %}
+                    <div style="margin: 0.5rem 0; padding: 0.5rem; background: #f3f4f6; border-radius: 5px;">
+                        {{ request.user.username }} - {{ request.status }}
+                        {% if request.message %}
+                            <br><em>"{{ request.message }}"</em>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <p style="color: #6b7280;">No requests yet</p>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No trips found</p>
+    {% endif %}
+    
+    <div style="margin-top: 2rem; padding: 1rem; background: #fef3c7; border-radius: 10px;">
+        <h4>🔍 How to Test:</h4>
+        <ol>
+            <li>Click "Request to Join" on a trip you didn't create</li>
+            <li>Fill out the form and submit</li>
+            <li>Check if you're still NOT a member (should show request pending)</li>
+            <li>Login as trip creator and approve the request</li>
+            <li>Check if you're now a member</li>
+        </ol>
+    </div>
+</div>
+{% endblock %}

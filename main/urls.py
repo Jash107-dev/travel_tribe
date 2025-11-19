@@ -63,4 +63,7 @@ urlpatterns = [
     # Hunt & Chatbot
     path('hunt/', views.hunt_view, name='hunt'),
     path('chatbot/', views.chatbot_view, name='chatbot'),
+    
+    # Test join system
+    path('test-join-system/', views.test_join_system, name='test_join_system'),
 ]

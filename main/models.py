@@ -56,6 +56,16 @@ class Trip(models.Model):
     @property
     def is_full(self):
         return self.members_count >= self.members_limit
+    
+    def add_member_safely(self, user):
+        """Only add member if they have an approved join request"""
+        try:
+            join_request = JoinRequest.objects.get(trip=self, user=user, status='approved')
+            self.joined_members.add(user)
+            return True
+        except JoinRequest.DoesNotExist:
+            print(f"WARNING: Attempted to add {user.username} to {self.destination} without approved request!")
+            return False
 
 
 # ------------------------------------------------

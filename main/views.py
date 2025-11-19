@@ -462,7 +462,7 @@ def join_destination_trip(request, trip_id):
             messages.warning(request, "Your previous request was rejected.")
         return redirect('trip_detail', trip_id=trip.id)
     
-    # Create join request
+    # ALWAYS create join request - no direct joining allowed
     if request.method == 'POST':
         message = request.POST.get('message', '')
         JoinRequest.objects.create(
@@ -470,10 +470,10 @@ def join_destination_trip(request, trip_id):
             user=request.user,
             message=message
         )
-        messages.success(request, f"Join request sent to {trip.created_by.username}!")
+        messages.success(request, f"Join request sent to {trip.created_by.username}! Wait for approval.")
         return redirect('trip_detail', trip_id=trip.id)
     
-    # Show request form
+    # Show request form for GET requests
     return render(request, 'main/join_request_form.html', {'trip': trip})
 
 
@@ -872,3 +872,9 @@ def hunt_view(request):
 def chatbot_view(request):
     """AI Travel Assistant Chatbot"""
     return render(request, 'main/chatbot.html')
+
+@login_required
+def test_join_system(request):
+    """Test page to verify join request system is working"""
+    trips = Trip.objects.all()[:5]  # Show first 5 trips
+    return render(request, 'main/test_join_system.html', {'trips': trips})
