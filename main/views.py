@@ -414,6 +414,9 @@ def join_destination_trip(request, trip_id):
     """Send join request for destination trip"""
     trip = get_object_or_404(Trip, id=trip_id)
     
+    print(f"DEBUG: User {request.user.username} trying to join trip {trip.destination}")
+    print(f"DEBUG: Request method: {request.method}")
+    
     # Check if user is the trip creator
     if request.user == trip.created_by:
         messages.info(request, "You are the creator of this trip.")
