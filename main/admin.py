@@ -1,4 +1,7 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from .models import (
     Trip, TripImage, TripPost, ChatRoom, ChatMessage, 
     PasswordResetOTP, UserProfile, TripReview, TripPhoto, Achievement, JoinRequest
@@ -273,3 +276,37 @@ class JoinRequestAdmin(admin.ModelAdmin):
             join_request.reject()
         self.message_user(request, f"Rejected {queryset.count()} requests")
     reject_requests.short_description = "Reject selected requests"
+
+
+# ================================================
+# 🔒 SECURITY: Prevent Multiple Admins
+# ================================================
+
+class SecureUserAdmin(UserAdmin):
+    """Custom User Admin with security restrictions"""
+    
+    def save_model(self, request, obj, form, change):
+        # SECURITY: Prevent creating additional superusers
+        if obj.is_superuser and not change:  # New superuser being created
+            existing_superusers = User.objects.filter(is_superuser=True)
+            if existing_superusers.exists():
+                raise ValidationError(
+                    "🔒 SECURITY BLOCK: Only ONE admin is allowed. "
+                    "Additional superuser accounts cannot be created for security reasons."
+                )
+        
+        # SECURITY: Prevent making existing users superusers if admin already exists
+        if obj.is_superuser and change:  # Existing user being made superuser
+            if not User.objects.get(pk=obj.pk).is_superuser:  # Wasn't superuser before
+                existing_superusers = User.objects.filter(is_superuser=True)
+                if existing_superusers.exists():
+                    raise ValidationError(
+                        "🔒 SECURITY BLOCK: Only ONE admin is allowed. "
+                        "Cannot promote users to admin when admin already exists."
+                    )
+        
+        super().save_model(request, obj, form, change)
+
+# Unregister the default User admin and register our secure version
+admin.site.unregister(User)
+admin.site.register(User, SecureUserAdmin)

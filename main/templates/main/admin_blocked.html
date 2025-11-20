@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Blocked - Travel Tribe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .security-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #ef4444;
+        }
+        
+        h1 {
+            color: #ef4444;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+        
+        .security-box {
+            background: #fee2e2;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #ef4444;
+        }
+        
+        .security-box p {
+            color: #991b1b;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 10px;
+            transition: transform 0.2s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .security-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="security-icon">🔒</div>
+        
+        <h1>Access Blocked</h1>
+        
+        <div class="security-box">
+            <p>🛡️ SECURITY PROTECTION ACTIVE</p>
+            <p>{{ message }}</p>
+            <p>This system allows only ONE admin account for maximum security.</p>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <a href="{{ admin_url }}" class="btn">
+                🎛️ Go to Admin Login
+            </a>
+            <a href="/" class="btn">
+                🏠 Back to Travel Tribe
+            </a>
+        </div>
+        
+        <div class="security-info">
+            <p><strong>Security Notice:</strong> This page is permanently disabled to prevent unauthorized admin creation. Only the original admin has access to administrative functions.</p>
+        </div>
+    </div>
+</body>
+</html>

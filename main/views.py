@@ -917,20 +917,27 @@ def test_join_system(request):
 # ===================================================================
 
 def create_admin_user(request):
-    """Create admin user for Render deployment (no shell access)"""
-    # Check if any superuser already exists
+    """SECURE: Create admin user ONLY ONCE - for Render deployment"""
+    
+    # SECURITY: Check if any superuser already exists
     if User.objects.filter(is_superuser=True).exists():
-        return render(request, 'main/admin_exists.html', {
+        return render(request, 'main/admin_blocked.html', {
             'admin_url': '/admin/',
-            'message': 'Admin user already exists! You can login to the admin panel.'
+            'message': '🔒 SECURITY: Admin already exists. Only ONE admin is allowed for security reasons.'
         })
     
+    # SECURITY: Only allow admin creation if NO superusers exist
     if request.method == 'POST':
         username = request.POST.get('username', 'admin')
         email = request.POST.get('email', 'admin@traveltribe.com')
-        password = request.POST.get('password', 'admin123')
+        password = request.POST.get('password')
         
-        # Create superuser
+        # SECURITY: Double-check no admin exists before creating
+        if User.objects.filter(is_superuser=True).exists():
+            messages.error(request, '🔒 SECURITY BLOCK: Admin already exists!')
+            return redirect('home')
+        
+        # Create the ONLY superuser
         try:
             user = User.objects.create_superuser(
                 username=username,
@@ -939,10 +946,11 @@ def create_admin_user(request):
             )
             
             messages.success(request, f'✅ Admin user "{username}" created successfully!')
-            return render(request, 'main/admin_created.html', {
+            return render(request, 'main/admin_created_final.html', {
                 'username': username,
                 'admin_url': '/admin/',
-                'site_url': '/'
+                'site_url': '/',
+                'security_message': '🔒 This page is now permanently disabled for security.'
             })
             
         except Exception as e:

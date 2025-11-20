@@ -6,8 +6,11 @@ class Command(BaseCommand):
     help = 'Create default superuser if none exists'
 
     def handle(self, *args, **options):
-        if not User.objects.filter(is_superuser=True).exists():
-            # Create default superuser
+        # SECURITY: Only create ONE admin EVER
+        existing_admins = User.objects.filter(is_superuser=True)
+        
+        if not existing_admins.exists():
+            # Create the ONLY superuser
             username = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'admin')
             email = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'admin@traveltribe.com')
             password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', 'admin123')
@@ -20,7 +23,7 @@ class Command(BaseCommand):
             
             self.stdout.write(
                 self.style.SUCCESS(
-                    f'✅ Superuser "{username}" created successfully!'
+                    f'✅ ONLY Superuser "{username}" created successfully!'
                 )
             )
             self.stdout.write(
@@ -28,7 +31,18 @@ class Command(BaseCommand):
                     f'🔐 Login at: /admin/ with username: {username}'
                 )
             )
-        else:
             self.stdout.write(
-                self.style.SUCCESS('✅ Superuser already exists')
+                self.style.ERROR(
+                    '🔒 SECURITY: Admin creation is now PERMANENTLY DISABLED'
+                )
+            )
+        else:
+            admin_count = existing_admins.count()
+            self.stdout.write(
+                self.style.SUCCESS(f'✅ Superuser already exists ({admin_count} admin(s))')
+            )
+            self.stdout.write(
+                self.style.ERROR(
+                    '🔒 SECURITY: No additional admins can be created'
+                )
             )
