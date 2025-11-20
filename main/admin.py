@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from .models import (
     Trip, TripImage, TripPost, ChatRoom, ChatMessage, 
-    PasswordResetOTP, UserProfile, TripReview, TripPhoto, Achievement, JoinRequest
+    UserProfile, TripReview, TripPhoto, Achievement, JoinRequest
 )
 
 # ================================================
@@ -132,20 +132,7 @@ class ChatMessageAdmin(admin.ModelAdmin):
     has_media.short_description = 'Media'
 
 # ================================================
-# PASSWORD RESET
-# ================================================
 
-@admin.register(PasswordResetOTP)
-class PasswordResetOTPAdmin(admin.ModelAdmin):
-    list_display = ('user', 'otp', 'created_at', 'is_valid')
-    search_fields = ('user__username', 'user__email')
-    list_filter = ('created_at',)
-    readonly_fields = ('created_at',)
-    
-    def is_valid(self, obj):
-        return obj.is_valid()
-    is_valid.boolean = True
-    is_valid.short_description = 'Valid'
 
 
 # ================================================
