@@ -883,8 +883,7 @@ def test_join_system(request):
     """Test page to verify join request system is working"""
     trips = Trip.objects.all()[:5]  # Show first 5 trips
     return render(request, 'main/test_join_system.html', {'trips': trips})
-# =
-==================================================================
+# ===================================================================
 # 🔐 SUPERUSER CREATION (For Render Free Tier)
 # ===================================================================
 
@@ -921,3 +920,53 @@ def create_admin_user(request):
             messages.error(request, f'❌ Error creating admin user: {str(e)}')
     
     return render(request, 'main/create_admin.html')
+# ====
+===============================================================
+# 🩺 HEALTH CHECK (For Deployment Debugging)
+# ===================================================================
+
+def health_check(request):
+    """Simple health check endpoint for deployment debugging"""
+    import django
+    from django.db import connection
+    
+    try:
+        # Test database connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        
+        db_status = "✅ Connected"
+    except Exception as e:
+        db_status = f"❌ Error: {str(e)}"
+    
+    health_data = {
+        'status': 'healthy',
+        'django_version': django.get_version(),
+        'database': db_status,
+        'timestamp': timezone.now().isoformat(),
+    }
+    
+    return JsonResponse(health_data)
+d
+ef deployment_status(request):
+    """Deployment status page for debugging"""
+    import django
+    from django.db import connection
+    
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        database_status = "✅ Database connected successfully"
+    except Exception as e:
+        database_status = f"❌ Database error: {str(e)}"
+    
+    context = {
+        'django_version': django.get_version(),
+        'database_status': database_status,
+        'user_count': User.objects.count(),
+        'admin_count': User.objects.filter(is_superuser=True).count(),
+        'trip_count': Trip.objects.count(),
+        'request_count': JoinRequest.objects.count(),
+    }
+    
+    return render(request, 'main/deployment_status.html', context)
