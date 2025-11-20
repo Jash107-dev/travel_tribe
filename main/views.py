@@ -447,7 +447,7 @@ def join_destination_trip(request, trip_id):
         return redirect('trip_detail', trip_id=trip.id)
     
     # Check if trip is full
-    if trip.is_full():
+    if trip.is_full:
         messages.warning(request, "This trip is already full.")
         return redirect('trip_detail', trip_id=trip.id)
     
@@ -531,7 +531,7 @@ def approve_join_request(request, request_id):
         return redirect('home')
     
     # Check if trip is full
-    if join_request.trip.is_full():
+    if join_request.trip.is_full:
         messages.warning(request, "Trip is full. Cannot approve more members.")
         return redirect('manage_join_requests', trip_id=join_request.trip.id)
     

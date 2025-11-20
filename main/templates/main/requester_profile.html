@@ -220,7 +220,7 @@
             {% if profile.date_of_birth %}
             <div class="info-row">
                 <div class="info-label">Age</div>
-                <div class="info-value">{{ profile.date_of_birth|timesince|split:" "|first }} years old</div>
+                <div class="info-value">{{ profile.date_of_birth|timesince }} old</div>
             </div>
             {% endif %}
             {% if profile.zodiac_sign %}
