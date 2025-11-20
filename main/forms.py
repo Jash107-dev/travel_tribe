@@ -65,6 +65,31 @@ class UserRegisterForm(UserCreationForm):
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError("This email is already registered.")
         return email
+    
+    def clean_password1(self):
+        password = self.cleaned_data.get('password1')
+        
+        if len(password) < 5:
+            raise forms.ValidationError("Password must be at least 5 characters long.")
+        
+        # Check for uppercase letter
+        if not any(c.isupper() for c in password):
+            raise forms.ValidationError("Password must contain at least one uppercase letter.")
+        
+        # Check for lowercase letter
+        if not any(c.islower() for c in password):
+            raise forms.ValidationError("Password must contain at least one lowercase letter.")
+        
+        # Check for digit
+        if not any(c.isdigit() for c in password):
+            raise forms.ValidationError("Password must contain at least one number.")
+        
+        # Check for special character
+        special_chars = "!@#$%^&*(),.?\":{}|<>"
+        if not any(c in special_chars for c in password):
+            raise forms.ValidationError("Password must contain at least one special character (!@#$%^&*(),.?\":{}|<>).")
+        
+        return password
 
     def save(self, commit=True):
         user = super().save(commit=False)
