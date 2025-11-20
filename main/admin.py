@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from .models import (
     Trip, TripImage, TripPost, ChatRoom, ChatMessage, 
-    UserProfile, TripReview, TripPhoto, Achievement
+    UserProfile, TripReview, TripPhoto
 )
 
 # ================================================
@@ -141,9 +141,9 @@ class ChatMessageAdmin(admin.ModelAdmin):
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'level', 'points', 'total_trips', 'location', 'created_at')
+    list_display = ('user', 'total_trips', 'location', 'created_at')
     search_fields = ('user__username', 'user__email', 'location', 'interests')
-    list_filter = ('zodiac_sign', 'level', 'created_at')
+    list_filter = ('zodiac_sign', 'created_at')
     readonly_fields = ('created_at', 'updated_at', 'trips_created_count', 'trips_joined_count', 'total_trips')
     
     fieldsets = (
@@ -156,9 +156,7 @@ class UserProfileAdmin(admin.ModelAdmin):
         ('Personal Details', {
             'fields': ('zodiac_sign', 'date_of_birth', 'mobile_number', 'location')
         }),
-        ('Gamification', {
-            'fields': ('points', 'level', 'badges')
-        }),
+
         ('Statistics', {
             'fields': ('trips_created_count', 'trips_joined_count', 'total_trips'),
             'classes': ('collapse',)
@@ -221,11 +219,7 @@ class TripPhotoAdmin(admin.ModelAdmin):
 # ACHIEVEMENTS
 # ================================================
 
-@admin.register(Achievement)
-class AchievementAdmin(admin.ModelAdmin):
-    list_display = ('name', 'icon', 'points_required', 'description')
-    search_fields = ('name', 'description')
-    list_filter = ('points_required',)
+
 
 
 # ================================================

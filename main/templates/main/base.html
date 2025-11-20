@@ -38,14 +38,7 @@
                 <li><a href="{% url 'create_trip' %}" class="navbar-link"><i class="fas fa-plus-circle"></i> Create Trip</a></li>
                 <li><a href="{% url 'add_trip' %}" class="navbar-link"><i class="fas fa-map-marked-alt"></i> Add Destination</a></li>
                 <li><a href="{% url 'user_profile' %}" class="navbar-link"><i class="fas fa-user-circle"></i> Profile</a></li>
-                <li class="navbar-stats">
-                    <span class="user-level" title="Your Level">
-                        <i class="fas fa-trophy"></i> Lvl {{ user.profile.level }}
-                    </span>
-                    <span class="user-points" title="Your Points">
-                        <i class="fas fa-star"></i> {{ user.profile.points }}
-                    </span>
-                </li>
+
                 <li><a href="{% url 'logout' %}" class="navbar-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
             {% endif %}

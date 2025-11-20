@@ -50,9 +50,7 @@ urlpatterns = [
     path('trip/<int:trip_id>/upload-photo/', views.upload_photo, name='upload_photo'),
     path('photo/<int:photo_id>/delete/', views.delete_photo, name='delete_photo'),
     
-    # Gamification
-    path('leaderboard/', views.leaderboard, name='leaderboard'),
-    path('achievements/', views.achievements, name='achievements'),
+
     path('profile/<str:username>/', views.public_profile, name='public_profile'),
     
     # Hunt & Chatbot

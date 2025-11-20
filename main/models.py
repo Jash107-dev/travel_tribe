@@ -96,10 +96,7 @@ class UserProfile(models.Model):
     date_of_birth = models.DateField(blank=True, null=True)
     location = models.CharField(max_length=100, blank=True)
     
-    # Gamification fields
-    points = models.IntegerField(default=0)
-    level = models.IntegerField(default=1)
-    badges = models.TextField(blank=True, help_text="Comma-separated badge names")
+
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -118,29 +115,6 @@ class UserProfile(models.Model):
     @property
     def total_trips(self):
         return self.trips_created_count + self.trips_joined_count
-    
-    @property
-    def badge_list(self):
-        return [b.strip() for b in self.badges.split(',') if b.strip()]
-    
-    def add_points(self, points):
-        """Add points and check for level up"""
-        self.points += points
-        # Level up every 100 points
-        new_level = (self.points // 100) + 1
-        if new_level > self.level:
-            self.level = new_level
-        self.save()
-    
-    def add_badge(self, badge_name):
-        """Add a badge if not already earned"""
-        badges = self.badge_list
-        if badge_name not in badges:
-            badges.append(badge_name)
-            self.badges = ', '.join(badges)
-            self.save()
-            return True
-        return False
 
 
 
@@ -289,16 +263,7 @@ class TripPhoto(models.Model):
 
 
 # ------------------------------------------------
-# 🏆 Achievement/Badge System
-# ------------------------------------------------
-class Achievement(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    description = models.TextField()
-    icon = models.CharField(max_length=50, default='🏆')
-    points_required = models.IntegerField(default=0)
-    
-    def __str__(self):
-        return f"{self.icon} {self.name}"
+
 
 
 # ------------------------------------------------
@@ -311,43 +276,4 @@ def create_user_profile(sender, instance, created, **kwargs):
         print(f"👤 Profile created for {instance.username}")
 
 
-# ------------------------------------------------
-# 🎯 Award points and badges for actions
-# ------------------------------------------------
-@receiver(post_save, sender=Trip)
-def award_trip_creation(sender, instance, created, **kwargs):
-    if created:
-        profile = instance.created_by.profile
-        profile.add_points(50)  # 50 points for creating a trip
-        if profile.trips_created_count == 1:
-            profile.add_badge('First Trip Creator 🎉')
-        if profile.trips_created_count == 5:
-            profile.add_badge('Trip Master 🗺️')
-        if profile.trips_created_count == 10:
-            profile.add_badge('Travel Legend 🌟')
 
-
-@receiver(post_save, sender=TripReview)
-def award_review_points(sender, instance, created, **kwargs):
-    if created:
-        profile = instance.user.profile
-        profile.add_points(20)  # 20 points for writing a review
-        review_count = TripReview.objects.filter(user=instance.user).count()
-        if review_count == 1:
-            profile.add_badge('First Reviewer ⭐')
-        if review_count == 10:
-            profile.add_badge('Review Expert 📝')
-
-
-@receiver(post_save, sender=TripPhoto)
-def award_photo_points(sender, instance, created, **kwargs):
-    if created:
-        profile = instance.user.profile
-        profile.add_points(10)  # 10 points for uploading a photo
-        photo_count = TripPhoto.objects.filter(user=instance.user).count()
-        if photo_count == 1:
-            profile.add_badge('First Photo 📸')
-        if photo_count == 20:
-            profile.add_badge('Photographer 📷')
-        if photo_count == 50:
-            profile.add_badge('Photo Master 🎨')

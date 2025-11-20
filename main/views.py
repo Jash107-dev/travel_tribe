@@ -378,10 +378,7 @@ def join_destination_trip(request, trip_id):
     # Add user directly to trip
     trip.add_member(request.user)
     
-    # Award points
-    request.user.profile.add_points(30)
-    
-    messages.success(request, f"🎉 Welcome to {trip.destination}! You joined successfully and earned 30 points!")
+    messages.success(request, f"🎉 Welcome to {trip.destination}! You joined successfully!")
     return redirect('trip_detail', trip_id=trip.id)
 
 
@@ -548,7 +545,7 @@ def add_review(request, trip_id):
                 rating=int(rating),
                 review_text=review_text
             )
-            messages.success(request, "Review added successfully! You earned 20 points! ⭐")
+            messages.success(request, "Review added successfully! ⭐")
         
         return redirect('trip_detail', trip_id=trip.id)
     
@@ -593,7 +590,7 @@ def upload_photo(request, trip_id):
             photo=photo,
             caption=caption
         )
-        messages.success(request, "Photo uploaded successfully! You earned 10 points! 📸")
+        messages.success(request, "Photo uploaded successfully! 📸")
         return redirect('trip_detail', trip_id=trip.id)
     
     return redirect('trip_detail', trip_id=trip.id)
@@ -618,45 +615,7 @@ def delete_photo(request, photo_id):
 # 🏆 GAMIFICATION - LEADERBOARD & ACHIEVEMENTS
 # ===================================================================
 
-def leaderboard(request):
-    """Display leaderboard with top users by points"""
-    top_users = UserProfile.objects.all().order_by('-points', '-level')[:50]
-    
-    # Get current user's rank if logged in
-    user_rank = None
-    if request.user.is_authenticated:
-        user_profile = request.user.profile
-        user_rank = UserProfile.objects.filter(points__gt=user_profile.points).count() + 1
-    
-    context = {
-        'top_users': top_users,
-        'user_rank': user_rank,
-    }
-    return render(request, 'main/leaderboard.html', context)
 
-
-@login_required
-def achievements(request):
-    """Display user's achievements and badges"""
-    profile = request.user.profile
-    
-    # Define all possible achievements
-    all_achievements = [
-        {'name': 'First Trip Creator 🎉', 'description': 'Create your first trip', 'earned': 'First Trip Creator 🎉' in profile.badge_list},
-        {'name': 'Trip Master 🗺️', 'description': 'Create 5 trips', 'earned': 'Trip Master 🗺️' in profile.badge_list},
-        {'name': 'Travel Legend 🌟', 'description': 'Create 10 trips', 'earned': 'Travel Legend 🌟' in profile.badge_list},
-        {'name': 'First Reviewer ⭐', 'description': 'Write your first review', 'earned': 'First Reviewer ⭐' in profile.badge_list},
-        {'name': 'Review Expert 📝', 'description': 'Write 10 reviews', 'earned': 'Review Expert 📝' in profile.badge_list},
-        {'name': 'First Photo 📸', 'description': 'Upload your first photo', 'earned': 'First Photo 📸' in profile.badge_list},
-        {'name': 'Photographer 📷', 'description': 'Upload 20 photos', 'earned': 'Photographer 📷' in profile.badge_list},
-        {'name': 'Photo Master 🎨', 'description': 'Upload 50 photos', 'earned': 'Photo Master 🎨' in profile.badge_list},
-    ]
-    
-    context = {
-        'profile': profile,
-        'all_achievements': all_achievements,
-    }
-    return render(request, 'main/achievements.html', context)
 
 
 @login_required
