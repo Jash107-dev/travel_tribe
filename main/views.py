@@ -2,13 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.core.mail import send_mail
-from django.conf import settings
-from django.utils.crypto import get_random_string
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from .models import Trip, TripImage, PasswordResetOTP, TripPost, ChatRoom, ChatMessage, UserProfile, JoinRequest, TripReview
-from .forms import TripForm, UserRegisterForm, ForgotPasswordForm, OTPVerifyForm, TripPostForm, UserProfileForm
+from .models import Trip, TripImage, TripPost, ChatRoom, ChatMessage, UserProfile, JoinRequest, TripReview, TripPhoto
+from .forms import TripForm, UserRegisterForm, TripPostForm, UserProfileForm
 from django.http import JsonResponse
 from django.db import models
 
@@ -51,14 +48,6 @@ def logout_view(request):
     logout(request)
     messages.success(request, "Logged out successfully!")
     return redirect('login')
-
-
-
-    # GET request (just show login form)
-    return render(request, 'main/login.html')
-
-
-    return render(request, 'main/login.html')
 
 
 
@@ -131,82 +120,7 @@ def trip_detail(request, trip_id):
     })
 
 
-# ===================================================================
-# 🔑 FORGOT PASSWORD (OTP FLOW)
-# ===================================================================
 
-def forgot_password(request):
-    """Send OTP to user's email"""
-    if request.method == 'POST':
-        form = ForgotPasswordForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data['email']
-
-            try:
-                user = User.objects.get(email=email)
-            except User.DoesNotExist:
-                messages.error(request, "No account found with this email.")
-                return redirect('forgot_password')
-
-            otp = get_random_string(length=6, allowed_chars='0123456789')
-            PasswordResetOTP.objects.create(user=user, otp=otp)
-
-            send_mail(
-                subject="Your Travel Tribe Password Reset OTP",
-                message=f"Your OTP is {otp}. It will expire in 5 minutes.",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[email],
-            )
-
-            request.session['reset_email'] = email
-            messages.success(request, "OTP sent to your email.")
-            return redirect('verify_otp')
-    else:
-        form = ForgotPasswordForm()
-    return render(request, 'main/forgot_password.html', {'form': form})
-
-
-def verify_otp(request):
-    """Verify OTP and reset password"""
-    email = request.session.get('reset_email')
-    if not email:
-        messages.error(request, "Session expired. Please try again.")
-        return redirect('forgot_password')
-
-    try:
-        user = User.objects.get(email=email)
-    except User.DoesNotExist:
-        messages.error(request, "User not found.")
-        return redirect('forgot_password')
-
-    if request.method == 'POST':
-        form = OTPVerifyForm(request.POST)
-        if form.is_valid():
-            otp_entered = form.cleaned_data['otp']
-            new_password = form.cleaned_data['new_password']
-
-            try:
-                otp_record = PasswordResetOTP.objects.filter(user=user).latest('created_at')
-            except PasswordResetOTP.DoesNotExist:
-                messages.error(request, "OTP not found.")
-                return redirect('forgot_password')
-
-            if not otp_record.is_valid():
-                messages.error(request, "OTP expired. Please request a new one.")
-                return redirect('forgot_password')
-
-            if otp_record.otp == otp_entered:
-                user.set_password(new_password)
-                user.save()
-                PasswordResetOTP.objects.filter(user=user).delete()
-                messages.success(request, "Password reset successful! You can log in now.")
-                return redirect('login')
-            else:
-                messages.error(request, "Invalid OTP. Try again.")
-    else:
-        form = OTPVerifyForm()
-
-    return render(request, 'main/verify_otp.html', {'form': form})
 
 
 # ===================================================================
@@ -528,7 +442,6 @@ def leave_destination_trip(request, trip_id):
 @login_required
 def manage_join_requests(request, trip_id):
     """View and manage join requests for a trip (creator only)"""
-    from main.models import JoinRequest
     trip = get_object_or_404(Trip, id=trip_id)
     
     # Only trip creator can manage requests
@@ -552,7 +465,6 @@ def manage_join_requests(request, trip_id):
 @login_required
 def approve_join_request(request, request_id):
     """Approve a join request"""
-    from main.models import JoinRequest
     join_request = get_object_or_404(JoinRequest, id=request_id)
     
     # Only trip creator can approve
@@ -573,7 +485,6 @@ def approve_join_request(request, request_id):
 @login_required
 def reject_join_request(request, request_id):
     """Reject a join request"""
-    from main.models import JoinRequest
     join_request = get_object_or_404(JoinRequest, id=request_id)
     
     # Only trip creator can reject
@@ -726,7 +637,6 @@ def mark_messages_read(request, trip_id):
 @login_required
 def add_review(request, trip_id):
     """Add a review for a trip"""
-    from .models import TripReview
     trip = get_object_or_404(Trip, id=trip_id)
     
     # Check if user has already reviewed this trip
@@ -764,7 +674,6 @@ def add_review(request, trip_id):
 @login_required
 def delete_review(request, review_id):
     """Delete a review"""
-    from .models import TripReview
     review = get_object_or_404(TripReview, id=review_id)
     
     if review.user != request.user:
@@ -784,7 +693,6 @@ def delete_review(request, review_id):
 @login_required
 def upload_photo(request, trip_id):
     """Upload a photo to a trip"""
-    from .models import TripPhoto
     trip = get_object_or_404(Trip, id=trip_id)
     
     if request.method == 'POST':
@@ -810,7 +718,6 @@ def upload_photo(request, trip_id):
 @login_required
 def delete_photo(request, photo_id):
     """Delete a photo"""
-    from .models import TripPhoto
     photo = get_object_or_404(TripPhoto, id=photo_id)
     
     if photo.user != request.user:
@@ -876,7 +783,6 @@ def public_profile(request, username):
     
     # Get user's trips and stats
     created_trips = Trip.objects.filter(created_by=user).order_by('-created_at')[:5]
-    from .models import TripReview, TripPhoto
     recent_reviews = TripReview.objects.filter(user=user).order_by('-created_at')[:5]
     recent_photos = TripPhoto.objects.filter(user=user).order_by('-uploaded_at')[:6]
     
@@ -907,11 +813,7 @@ def chatbot_view(request):
     """AI Travel Assistant Chatbot"""
     return render(request, 'main/chatbot.html')
 
-@login_required
-def test_join_system(request):
-    """Test page to verify join request system is working"""
-    trips = Trip.objects.all()[:5]  # Show first 5 trips
-    return render(request, 'main/test_join_system.html', {'trips': trips})
+
 # ===================================================================
 # 🔐 SUPERUSER CREATION (For Render Free Tier)
 # ===================================================================

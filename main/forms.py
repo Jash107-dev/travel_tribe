@@ -54,17 +54,9 @@ class TripForm(forms.ModelForm):
 # 👤 User Registration Form
 # ------------------------------------------------
 class UserRegisterForm(UserCreationForm):
-    email = forms.EmailField(required=True, label="Email")
-
     class Meta:
         model = User
-        fields = ['username', 'email', 'password1', 'password2']
-
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        if User.objects.filter(email=email).exists():
-            raise forms.ValidationError("This email is already registered.")
-        return email
+        fields = ['username', 'password1', 'password2']
     
     def clean_password1(self):
         password = self.cleaned_data.get('password1')
@@ -91,22 +83,9 @@ class UserRegisterForm(UserCreationForm):
         
         return password
 
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.email = self.cleaned_data['email']
-        if commit:
-            user.save()
-        return user
 
-# ------------------------------------------------
-# 🔑 Forgot Password / OTP Forms
-# ------------------------------------------------
-class ForgotPasswordForm(forms.Form):
-    email = forms.EmailField(label="Registered Email")
 
-class OTPVerifyForm(forms.Form):
-    otp = forms.CharField(label="Enter OTP", max_length=6)
-    new_password = forms.CharField(label="New Password", widget=forms.PasswordInput())
+
 
 # ------------------------------------------------
 # 🌍 TripPost Form (Looking for Tribe)

@@ -12,9 +12,7 @@ urlpatterns = [
     path('add-trip/', views.add_trip, name='add_trip'),
     path('trip/<int:trip_id>/', views.trip_detail, name='trip_detail'),
 
-    # Forgot password
-    path('forgot-password/', views.forgot_password, name='forgot_password'),
-    path('verify-otp/', views.verify_otp, name='verify_otp'),
+
 
     # Trip posts
     path('create-trip/', views.create_trip_post, name='create_trip'),
@@ -64,9 +62,6 @@ urlpatterns = [
     # Hunt & Chatbot
     path('hunt/', views.hunt_view, name='hunt'),
     path('chatbot/', views.chatbot_view, name='chatbot'),
-    
-    # Test join system
-    path('test-join-system/', views.test_join_system, name='test_join_system'),
     
     # Admin user creation (for Render free tier)
     path('create-admin-user/', views.create_admin_user, name='create_admin_user'),
