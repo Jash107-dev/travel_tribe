@@ -381,7 +381,7 @@ def join_destination_trip(request, trip_id):
     # Award points
     request.user.profile.add_points(30)
     
-    messages.success(request, f"🎉 You joined {trip.destination} trip successfully!")
+    messages.success(request, f"🎉 Welcome to {trip.destination}! You joined successfully and earned 30 points!")
     return redirect('trip_detail', trip_id=trip.id)
 
 
