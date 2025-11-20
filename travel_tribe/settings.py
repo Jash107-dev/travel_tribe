@@ -8,8 +8,8 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key-here-change-in-production-12345')
-DEBUG = True  # Temporarily True to see errors
-ALLOWED_HOSTS = ['*']  # Allow all hosts temporarily
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+ALLOWED_HOSTS = ['*']  # Allow all hosts for now
 
 
 # ------------------------------------------------------------
@@ -78,19 +78,21 @@ import dj_database_url
 
 # Database configuration - use PostgreSQL on Render, SQLite locally
 DATABASE_URL = os.environ.get('DATABASE_URL')
-print(f"🔍 DATABASE_URL exists: {bool(DATABASE_URL)}")
-print(f"🔍 DATABASE_URL value: {DATABASE_URL[:50] if DATABASE_URL else 'None'}...")
 
 if DATABASE_URL:
     # Production: Use PostgreSQL from Render
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
-    print("✅ Using PostgreSQL database")
+    try:
+        DATABASES = {
+            'default': dj_database_url.config(
+                default=DATABASE_URL,
+                conn_max_age=600,
+                conn_health_checks=True,
+            )
+        }
+        print("✅ Using PostgreSQL database")
+    except Exception as e:
+        print(f"❌ Database configuration error: {e}")
+        raise
 else:
     # Development: Use SQLite
     DATABASES = {
