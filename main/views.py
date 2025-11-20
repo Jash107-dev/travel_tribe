@@ -378,7 +378,7 @@ def join_destination_trip(request, trip_id):
     # Add user directly to trip
     trip.add_member(request.user)
     
-    messages.success(request, f"🎉 Welcome to {trip.destination}! You joined successfully!")
+    messages.success(request, f"🎉 Welcome to {trip.destination}! You joined the trip successfully!")
     return redirect('trip_detail', trip_id=trip.id)
 
 
