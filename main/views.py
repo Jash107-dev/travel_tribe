@@ -11,6 +11,7 @@ from .models import Trip, TripImage, PasswordResetOTP, TripPost, ChatRoom, ChatM
 from .forms import TripForm, UserRegisterForm, ForgotPasswordForm, OTPVerifyForm, TripPostForm, UserProfileForm
 from django.http import JsonResponse
 from django.db import models
+from django.views.decorators.csrf import csrf_exempt
 
 # ===================================================================
 # 🧍 USER AUTHENTICATION
@@ -882,3 +883,41 @@ def test_join_system(request):
     """Test page to verify join request system is working"""
     trips = Trip.objects.all()[:5]  # Show first 5 trips
     return render(request, 'main/test_join_system.html', {'trips': trips})
+# =
+==================================================================
+# 🔐 SUPERUSER CREATION (For Render Free Tier)
+# ===================================================================
+
+def create_admin_user(request):
+    """Create admin user for Render deployment (no shell access)"""
+    # Check if any superuser already exists
+    if User.objects.filter(is_superuser=True).exists():
+        return render(request, 'main/admin_exists.html', {
+            'admin_url': '/admin/',
+            'message': 'Admin user already exists! You can login to the admin panel.'
+        })
+    
+    if request.method == 'POST':
+        username = request.POST.get('username', 'admin')
+        email = request.POST.get('email', 'admin@traveltribe.com')
+        password = request.POST.get('password', 'admin123')
+        
+        # Create superuser
+        try:
+            user = User.objects.create_superuser(
+                username=username,
+                email=email,
+                password=password
+            )
+            
+            messages.success(request, f'✅ Admin user "{username}" created successfully!')
+            return render(request, 'main/admin_created.html', {
+                'username': username,
+                'admin_url': '/admin/',
+                'site_url': '/'
+            })
+            
+        except Exception as e:
+            messages.error(request, f'❌ Error creating admin user: {str(e)}')
+    
+    return render(request, 'main/create_admin.html')

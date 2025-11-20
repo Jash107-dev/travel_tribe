@@ -66,4 +66,7 @@ urlpatterns = [
     
     # Test join system
     path('test-join-system/', views.test_join_system, name='test_join_system'),
+    
+    # Admin user creation (for Render free tier)
+    path('create-admin-user/', views.create_admin_user, name='create_admin_user'),
 ]

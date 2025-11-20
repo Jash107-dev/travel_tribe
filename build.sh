@@ -21,4 +21,9 @@ python create_default_user.py || {
     echo "⚠️  User creation failed (might already exist)"
 }
 
+echo "🔐 Creating default superuser if needed..."
+python manage.py create_default_superuser || {
+    echo "⚠️  Superuser creation failed (might already exist)"
+}
+
 echo "✅ Build complete!"

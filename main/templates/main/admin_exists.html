@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Already Exists - Travel Tribe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .info-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #007bff;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+        
+        .info-box {
+            background: #d1ecf1;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .info-box p {
+            color: #0c5460;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 10px;
+            transition: transform 0.2s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="info-icon">ℹ️</div>
+        
+        <h1>Admin User Already Exists</h1>
+        
+        <div class="info-box">
+            <p><strong>🔐 Security Notice:</strong> An admin user has already been created for this application.</p>
+            <p>{{ message }}</p>
+            <p>If you forgot your admin credentials, you'll need to reset them through the database or contact support.</p>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <a href="{{ admin_url }}" class="btn">
+                🎛️ Go to Admin Login
+            </a>
+            <a href="/" class="btn btn-secondary">
+                🏠 Back to Travel Tribe
+            </a>
+        </div>
+    </div>
+</body>
+</html>
