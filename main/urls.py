@@ -36,11 +36,7 @@ urlpatterns = [
     path('join-destination-trip/<int:trip_id>/', views.join_destination_trip, name='join_destination_trip'),
     path('leave-destination-trip/<int:trip_id>/', views.leave_destination_trip, name='leave_destination_trip'),
     
-    # Join Request Management
-    path('trip/<int:trip_id>/manage-requests/', views.manage_join_requests, name='manage_join_requests'),
-    path('join-request/<int:request_id>/approve/', views.approve_join_request, name='approve_join_request'),
-    path('join-request/<int:request_id>/reject/', views.reject_join_request, name='reject_join_request'),
-    path('requester-profile/<int:user_id>/', views.view_requester_profile, name='view_requester_profile'),
+
     
     # Real-time Chat API
     path('api/chat/<int:trip_id>/messages/', views.get_new_messages, name='get_new_messages'),

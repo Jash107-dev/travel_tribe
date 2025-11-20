@@ -57,87 +57,18 @@ class Trip(models.Model):
     def is_full(self):
         return self.members_count >= self.members_limit
     
-    def add_member_safely(self, user):
-        """Only add member if they have an approved join request"""
-        try:
-            join_request = JoinRequest.objects.get(trip=self, user=user, status='approved')
-            self.joined_members.add(user)
-            return True
-        except JoinRequest.DoesNotExist:
-            print(f"WARNING: Attempted to add {user.username} to {self.destination} without approved request!")
-            return False
-    
-    def save(self, *args, **kwargs):
-        """Override save to prevent unauthorized member additions"""
-        # Store original members before save
-        if self.pk:
-            original_members = set(self.joined_members.all())
-        else:
-            original_members = set()
-        
-        super().save(*args, **kwargs)
-        
-        # Check if any unauthorized members were added
-        if self.pk:
-            current_members = set(self.joined_members.all())
-            new_members = current_members - original_members
-            
-            for member in new_members:
-                if member != self.created_by:  # Allow trip creator
-                    # Check if they have approved request
-                    try:
-                        JoinRequest.objects.get(trip=self, user=member, status='approved')
-                    except JoinRequest.DoesNotExist:
-                        # Remove unauthorized member
-                        self.joined_members.remove(member)
-                        print(f"🚫 BLOCKED: Removed {member.username} from {self.destination} - no approved request!")
-
-
-# ------------------------------------------------
-# 🔔 Join Request Model (Trip Approval System)
-# ------------------------------------------------
-class JoinRequest(models.Model):
-    STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
-    ]
-    
-    trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name='join_requests')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='trip_join_requests')
-    message = models.TextField(blank=True, help_text="Optional message to trip creator")
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        unique_together = ('trip', 'user')  # One request per user per trip
-        ordering = ['-created_at']
-    
-    def __str__(self):
-        return f"{self.user.username} → {self.trip.destination} ({self.status})"
-    
-    def approve(self):
-        """ONLY WAY TO JOIN A TRIP - Approve the join request and add user to trip"""
-        if self.status != 'pending':
-            return False
-            
-        self.status = 'approved'
-        self.save()
-        
-        # Add user to trip (ONLY place this should happen)
-        self.trip.joined_members.add(self.user)
-        
-        # Award points
-        self.user.profile.add_points(30)
-        
-        print(f"✅ APPROVED: {self.user.username} joined {self.trip.destination}")
+    def add_member(self, user):
+        """Add member to trip directly"""
+        self.joined_members.add(user)
         return True
     
-    def reject(self):
-        """Reject the join request"""
-        self.status = 'rejected'
-        self.save()
+    def save(self, *args, **kwargs):
+        """Standard save method"""
+        super().save(*args, **kwargs)
+
+
+# ------------------------------------------------
+
 
 
 # ------------------------------------------------

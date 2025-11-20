@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from .models import (
     Trip, TripImage, TripPost, ChatRoom, ChatMessage, 
-    UserProfile, TripReview, TripPhoto, Achievement, JoinRequest
+    UserProfile, TripReview, TripPhoto, Achievement
 )
 
 # ================================================
@@ -232,37 +232,7 @@ class AchievementAdmin(admin.ModelAdmin):
 # JOIN REQUEST MANAGEMENT
 # ================================================
 
-@admin.register(JoinRequest)
-class JoinRequestAdmin(admin.ModelAdmin):
-    list_display = ('user', 'trip', 'status', 'created_at', 'updated_at')
-    search_fields = ('user__username', 'trip__destination')
-    list_filter = ('status', 'created_at')
-    date_hierarchy = 'created_at'
-    readonly_fields = ('created_at', 'updated_at')
-    
-    fieldsets = (
-        ('Request Information', {
-            'fields': ('trip', 'user', 'message', 'status')
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at')
-        }),
-    )
-    
-    actions = ['approve_requests', 'reject_requests']
-    
-    def approve_requests(self, request, queryset):
-        for join_request in queryset.filter(status='pending'):
-            if not join_request.trip.is_full():
-                join_request.approve()
-        self.message_user(request, f"Approved {queryset.count()} requests")
-    approve_requests.short_description = "Approve selected requests"
-    
-    def reject_requests(self, request, queryset):
-        for join_request in queryset.filter(status='pending'):
-            join_request.reject()
-        self.message_user(request, f"Rejected {queryset.count()} requests")
-    reject_requests.short_description = "Reject selected requests"
+
 
 
 # ================================================
