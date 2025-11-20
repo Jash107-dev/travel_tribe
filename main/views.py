@@ -331,6 +331,35 @@ def chat_room(request, trip_id):
     return render(request, 'main/chat.html', {'trip': trip_post, 'messages': chat_messages})
 
 
+@login_required
+def destination_chat_room(request, trip_id):
+    """Chat room for main trips (Trip model)"""
+    trip = get_object_or_404(Trip, id=trip_id)
+    chat_room_obj, created = ChatRoom.objects.get_or_create(trip=trip)
+    chat_messages = ChatMessage.objects.filter(chat_room=chat_room_obj).order_by('timestamp')
+
+    # Check if user is member or creator
+    if request.user != trip.created_by and request.user not in trip.joined_members.all():
+        messages.error(request, "You're not part of this trip.")
+        return redirect('trip_detail', trip_id=trip.id)
+
+    if request.method == 'POST':
+        content = request.POST.get('content', '').strip()
+        media_file = request.FILES.get('media_file')
+        
+        # Create message if there's content or media
+        if content or media_file:
+            ChatMessage.objects.create(
+                chat_room=chat_room_obj, 
+                user=request.user, 
+                content=content,
+                media_file=media_file
+            )
+            messages.success(request, "Message sent!")
+        return redirect('destination_chat_room', trip_id=trip.id)
+
+    return render(request, 'main/destination_chat.html', {'trip': trip, 'messages': chat_messages})
+
 
 # ===================================================================
 # ✏️ EDIT & DELETE TRIP POSTS

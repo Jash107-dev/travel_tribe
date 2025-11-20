@@ -23,6 +23,7 @@ urlpatterns = [
 
     # Chat
     path('chat/<int:trip_id>/', views.chat_room, name='chat_room'),
+    path('destination-chat/<int:trip_id>/', views.destination_chat_room, name='destination_chat_room'),
     
     # Edit/Delete Trip Posts
     path('edit-trip/<int:trip_id>/', views.edit_trip_post, name='edit_trip_post'),

@@ -301,8 +301,8 @@
               </a>
             {% elif user in trip.joined_members.all %}
               <!-- Member Actions -->
-              <a href="{% url 'leave_destination_trip' trip.id %}" class="btn btn-secondary btn-full">
-                <i class="fas fa-sign-out-alt"></i> Leave Trip
+              <a href="{% url 'destination_chat_room' trip.id %}" class="btn btn-success btn-full">
+                <i class="fas fa-comments"></i> Enter Chat
               </a>
             {% else %}
               <!-- Non-member Actions -->

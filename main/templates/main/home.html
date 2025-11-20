@@ -177,8 +177,8 @@
           {% if user.is_authenticated %}
           <div class="destination-actions" style="margin-top: 10px;">
             {% if user in trip.joined_members.all %}
-              <a href="{% url 'leave_destination_trip' trip.id %}" class="btn btn-secondary btn-sm" style="width: 100%;">
-                <i class="fas fa-sign-out-alt"></i> Leave Trip
+              <a href="{% url 'destination_chat_room' trip.id %}" class="btn btn-success btn-sm" style="width: 100%;">
+                <i class="fas fa-comments"></i> Enter Chat
               </a>
             {% else %}
               {% if trip.is_full %}

@@ -272,14 +272,27 @@ class TripPost(models.Model):
 
 
 # ------------------------------------------------
-# 💬 ChatRoom (Each TripPost Gets One Chat Room)
+# 💬 ChatRoom (For Both TripPost and Trip)
 # ------------------------------------------------
 class ChatRoom(models.Model):
-    trip_post = models.OneToOneField(TripPost, on_delete=models.CASCADE, related_name='chatroom')
+    trip_post = models.OneToOneField(TripPost, on_delete=models.CASCADE, related_name='chatroom', null=True, blank=True)
+    trip = models.OneToOneField(Trip, on_delete=models.CASCADE, related_name='chatroom', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"ChatRoom for {self.trip_post.destination}"
+        if self.trip_post:
+            return f"ChatRoom for TripPost: {self.trip_post.destination}"
+        elif self.trip:
+            return f"ChatRoom for Trip: {self.trip.destination}"
+        return "ChatRoom"
+    
+    @property
+    def destination(self):
+        if self.trip_post:
+            return self.trip_post.destination
+        elif self.trip:
+            return self.trip.destination
+        return "Unknown"
 
 
 class ChatMessage(models.Model):
@@ -307,13 +320,19 @@ class ChatMessage(models.Model):
 
 
 # ------------------------------------------------
-# 🚀 Auto-create ChatRoom when a TripPost is created
+# 🚀 Auto-create ChatRoom when TripPost or Trip is created
 # ------------------------------------------------
 @receiver(post_save, sender=TripPost)
 def create_chatroom_for_trip_post(sender, instance, created, **kwargs):
     if created:
         ChatRoom.objects.create(trip_post=instance)
-        print(f"💬 ChatRoom created for {instance.destination}")
+        print(f"💬 ChatRoom created for TripPost: {instance.destination}")
+
+@receiver(post_save, sender=Trip)
+def create_chatroom_for_trip(sender, instance, created, **kwargs):
+    if created:
+        ChatRoom.objects.create(trip=instance)
+        print(f"💬 ChatRoom created for Trip: {instance.destination}")
 
 
 # ------------------------------------------------
