@@ -411,12 +411,6 @@ def join_destination_trip(request, trip_id):
     trip.joined_members.add(request.user)
     messages.success(request, f"🎉 Welcome to {trip.destination}!")
     return redirect('trip_detail', trip_id=trip.id)
-        return redirect('trip_detail', trip_id=trip.id)
-    
-    # Simple join
-    trip.joined_members.add(request.user)
-    messages.success(request, f"🎉 Welcome to {trip.destination}!")
-    return redirect('trip_detail', trip_id=trip.id)
 
 
 @login_required
