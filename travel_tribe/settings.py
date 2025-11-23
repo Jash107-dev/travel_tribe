@@ -5,7 +5,7 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-minimal-key-12345')
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+DEBUG = False
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
@@ -61,42 +61,10 @@ else:
         }
     }
 
-# Static files configuration for Render
+# Static files - SIMPLE configuration that works
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Tell Django where to find static files during development
-STATICFILES_DIRS = []
-
-# WhiteNoise configuration for serving static files on Render
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-
-# WhiteNoise settings
-WHITENOISE_USE_FINDERS = True
-WHITENOISE_AUTOREFRESH = True
-
-# Static files finders
-STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-]
-
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Minimal logging
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'ERROR',
-    },
-}
