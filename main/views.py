@@ -56,24 +56,19 @@ def logout_view(request):
 # ===================================================================
 
 def home(request):
+    # Simple, safe home view
     try:
-        # Try to get featured trips, fallback to all trips if field doesn't exist
-        try:
-            featured_trips = Trip.objects.filter(is_featured=True).order_by('-created_at')
-        except Exception:
-            # Fallback if is_featured field doesn't exist yet
-            featured_trips = Trip.objects.all().order_by('-created_at')[:6]
-        
+        # Get all trips (no featured filtering for now)
+        all_trips = Trip.objects.all().order_by('-created_at')[:10]
         tribe_posts = TripPost.objects.all().order_by('-created_at')[:5]
 
         return render(request, 'main/home.html', {
-            'featured_trips': featured_trips,
+            'featured_trips': all_trips,  # Use all trips as featured for now
             'tribe_posts': tribe_posts,
         })
     except Exception as e:
-        # Return error details for debugging
-        import traceback
-        return HttpResponse(f"Home page error: {str(e)}<br><br>Traceback:<br>{traceback.format_exc().replace(chr(10), '<br>')}", status=500)
+        # Simple error response
+        return HttpResponse(f"Error: {str(e)}", status=500)
 
 
 # ===================================================================
@@ -400,27 +395,27 @@ def user_profile(request):
 
 @login_required
 def join_destination_trip(request, trip_id):
-    """Direct join system for all trips"""
+    """Simple direct join system"""
     trip = get_object_or_404(Trip, id=trip_id)
     
-    # Check if user is the trip creator
+    # Basic checks
     if request.user == trip.created_by:
         messages.info(request, "You are the creator of this trip.")
         return redirect('trip_detail', trip_id=trip.id)
     
-    # Check if user is already a member
     if request.user in trip.joined_members.all():
         messages.info(request, "You are already a member of this trip.")
         return redirect('trip_detail', trip_id=trip.id)
     
-    # Check if trip is full
-    if trip.is_full:
-        messages.warning(request, "This trip is already full.")
+    # Simple join
+    trip.joined_members.add(request.user)
+    messages.success(request, f"🎉 Welcome to {trip.destination}!")
+    return redirect('trip_detail', trip_id=trip.id)
         return redirect('trip_detail', trip_id=trip.id)
     
-    # Direct join for all trips
-    trip.add_member(request.user)
-    messages.success(request, f"🎉 Welcome to {trip.destination}! You joined the trip successfully!")
+    # Simple join
+    trip.joined_members.add(request.user)
+    messages.success(request, f"🎉 Welcome to {trip.destination}!")
     return redirect('trip_detail', trip_id=trip.id)
 
 
@@ -722,8 +717,9 @@ def create_admin_user(request):
             messages.error(request, f'❌ Error creating admin user: {str(e)}')
     
     return render(request, 'main/create_admin.html')
-def h
-ealth_check(request):
+
+
+def health_check(request):
     """Simple health check endpoint"""
     try:
         # Test database connection

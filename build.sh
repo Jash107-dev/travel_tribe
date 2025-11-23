@@ -1,21 +1,18 @@
 #!/usr/bin/env bash
 # exit on error
 set -o errexit
-set -x  # Print commands as they execute
 
 echo "🔧 Installing dependencies..."
-pip install --upgrade pip
-pip install -r requirements.txt
+pip install --upgrade pip --no-cache-dir
+pip install -r requirements.txt --no-cache-dir
 
 echo "📦 Collecting static files..."
-python manage.py collectstatic --no-input --verbosity 2
+python manage.py collectstatic --no-input --clear
 
 echo "🗄️  Running database migrations..."
-python manage.py migrate --no-input --verbosity 2
+python manage.py migrate --no-input
 
 echo "👤 Creating default superuser if needed..."
-python manage.py create_default_superuser || {
-    echo "⚠️  Superuser creation failed (might already exist)"
-}
+python manage.py create_default_superuser || echo "⚠️  Superuser already exists"
 
 echo "✅ Build complete!"

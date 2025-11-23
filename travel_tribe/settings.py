@@ -8,7 +8,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key-here-change-in-production-12345')
-DEBUG = True  # Enable to see production errors
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 ALLOWED_HOSTS = ['*']  # Allow all hosts for now
 
 # CSRF Settings
@@ -100,6 +100,12 @@ if DATABASE_URL:
                 default=DATABASE_URL,
                 conn_max_age=600,
                 conn_health_checks=True,
+                options={
+                    'MAX_CONNS': 20,
+                    'OPTIONS': {
+                        'MAX_CONNS': 20,
+                    }
+                }
             )
         }
         print("✅ Using PostgreSQL database")
@@ -207,6 +213,12 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': 'INFO',
+        'level': 'WARNING' if not DEBUG else 'INFO',
+    },
+    'loggers': {
+        'django.db.backends': {
+            'level': 'WARNING',
+            'handlers': ['console'],
+        },
     },
 }

@@ -2,21 +2,22 @@ services:
   - type: web
     name: travel-tribe
     env: python
-    buildCommand: "bash build.sh"
-    startCommand: "gunicorn travel_tribe.wsgi:application"
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn travel_tribe.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.9
+      - key: DEBUG
+        value: false
       - key: SECRET_KEY
         generateValue: true
-      - key: DEBUG
-        value: False
-      - key: DATABASE_URL
-        fromDatabase:
-          name: travel-tribe-db
-          property: connectionString
-
-databases:
-  - name: travel-tribe-db
-    databaseName: travel_tribe
-    user: travel_tribe_user
+      - key: WEB_CONCURRENCY
+        value: 2
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    healthCheckPath: /health/
+    
+  - type: pserv
+    name: travel-tribe-db
+    env: postgresql
+    plan: free
+    databaseName: travel_tribe_db
+    databaseUser: travel_tribe_user
