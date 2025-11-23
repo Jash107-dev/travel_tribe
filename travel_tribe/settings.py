@@ -8,8 +8,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-render-key-12345')
 DEBUG = False
 ALLOWED_HOSTS = ['*']
 
+# MINIMAL APPS - NO ADMIN
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -61,7 +61,7 @@ else:
         }
     }
 
-# Static files - TESTED configuration for Render
+# SIMPLE STATIC FILES - NO COMPRESSION
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
