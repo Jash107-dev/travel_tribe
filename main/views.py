@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from .models import Trip, TripImage, TripPost, ChatRoom, ChatMessage, UserProfile, TripReview, TripPhoto
+from .models import Trip, TripImage, TripPost, ChatRoom, ChatMessage, UserProfile, TripReview, TripPhoto, FeaturedTripRequest
 from .forms import TripForm, UserRegisterForm, TripPostForm, UserProfileForm
 from django.http import JsonResponse
 from django.db import models
@@ -393,8 +393,7 @@ def join_destination_trip(request, trip_id):
     """Join system for featured trips - may require approval"""
     trip = get_object_or_404(Trip, id=trip_id)
     
-    # Import the model here to avoid circular imports
-    from .models import FeaturedTripRequest
+
     
     # Check if user is the trip creator
     if request.user == trip.created_by:
