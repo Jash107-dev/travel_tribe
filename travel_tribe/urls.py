@@ -16,8 +16,6 @@ urlpatterns = [
 
     # 2. Main Application URLs
     path('', include('main.urls')),
-
-    
 ]
 
 # ✅ Serve media and static files
