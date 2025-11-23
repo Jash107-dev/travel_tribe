@@ -40,7 +40,7 @@ urlpatterns = [
     
     # Real-time Chat API
     path('api/chat/<int:trip_id>/messages/', views.get_new_messages, name='get_new_messages'),
-    path('api/notifications/unread/', views.get_unread_count, name='get_unread_count'),
+
     
     # Reviews & Ratings
     path('trip/<int:trip_id>/review/', views.add_review, name='add_review'),

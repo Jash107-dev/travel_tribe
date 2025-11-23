@@ -477,44 +477,7 @@ def get_new_messages(request, trip_id):
         return JsonResponse({'messages': [], 'count': 0})
 
 
-@login_required
-def get_unread_count(request):
-    """API endpoint to get unread message count across all trips"""
-    # Get all trips the user is part of
-    user_trips = TripPost.objects.filter(
-        models.Q(user=request.user) | models.Q(joined_members=request.user)
-    ).distinct()
-    
-    # Get the last seen message ID for each trip from session
-    last_seen = request.session.get('last_seen_messages', {})
-    
-    total_unread = 0
-    trip_unread = {}
-    
-    for trip in user_trips:
-        try:
-            chat_room_obj = ChatRoom.objects.get(trip_post=trip)
-            last_seen_id = last_seen.get(str(trip.id), 0)
-            
-            # Count messages after last seen that are not from current user
-            unread = ChatMessage.objects.filter(
-                chat_room=chat_room_obj,
-                id__gt=last_seen_id
-            ).exclude(user=request.user).count()
-            
-            if unread > 0:
-                trip_unread[trip.id] = {
-                    'count': unread,
-                    'destination': trip.destination
-                }
-                total_unread += unread
-        except ChatRoom.DoesNotExist:
-            continue
-    
-    return JsonResponse({
-        'total_unread': total_unread,
-        'trips': trip_unread
-    })
+
 
 
 @login_required

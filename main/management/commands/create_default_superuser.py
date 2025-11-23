@@ -11,9 +11,9 @@ class Command(BaseCommand):
         
         if not existing_admins.exists():
             # Create the ONLY superuser
-            username = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'admin')
-            email = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'admin@traveltribe.com')
-            password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', 'admin123')
+            username = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'Jashwanth')
+            email = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'jashwanth@traveltribe.com')
+            password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', 'Jash@2289')
             
             User.objects.create_superuser(
                 username=username,
