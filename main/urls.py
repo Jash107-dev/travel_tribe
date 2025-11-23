@@ -62,4 +62,5 @@ urlpatterns = [
     
     # Health check
     path('health/', views.health_check, name='health_check'),
+    path('test/', views.simple_test, name='simple_test'),
 ]

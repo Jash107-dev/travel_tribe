@@ -56,14 +56,24 @@ def logout_view(request):
 # ===================================================================
 
 def home(request):
-    # Show featured trips instead of regular destination trips
-    featured_trips = Trip.objects.filter(is_featured=True).order_by('-created_at')
-    tribe_posts = TripPost.objects.all().order_by('-created_at')[:5]
+    try:
+        # Try to get featured trips, fallback to all trips if field doesn't exist
+        try:
+            featured_trips = Trip.objects.filter(is_featured=True).order_by('-created_at')
+        except Exception:
+            # Fallback if is_featured field doesn't exist yet
+            featured_trips = Trip.objects.all().order_by('-created_at')[:6]
+        
+        tribe_posts = TripPost.objects.all().order_by('-created_at')[:5]
 
-    return render(request, 'main/home.html', {
-        'featured_trips': featured_trips,
-        'tribe_posts': tribe_posts,
-    })
+        return render(request, 'main/home.html', {
+            'featured_trips': featured_trips,
+            'tribe_posts': tribe_posts,
+        })
+    except Exception as e:
+        # Return error details for debugging
+        import traceback
+        return HttpResponse(f"Home page error: {str(e)}<br><br>Traceback:<br>{traceback.format_exc().replace(chr(10), '<br>')}", status=500)
 
 
 # ===================================================================
@@ -712,3 +722,34 @@ def create_admin_user(request):
             messages.error(request, f'❌ Error creating admin user: {str(e)}')
     
     return render(request, 'main/create_admin.html')
+def h
+ealth_check(request):
+    """Simple health check endpoint"""
+    try:
+        # Test database connection
+        trip_count = Trip.objects.count()
+        user_count = User.objects.count()
+        
+        # Try to check featured trips, fallback if field doesn't exist
+        try:
+            featured_count = Trip.objects.filter(is_featured=True).count()
+        except Exception:
+            featured_count = 0
+        
+        return JsonResponse({
+            'status': 'healthy',
+            'trips': trip_count,
+            'users': user_count,
+            'featured_trips': featured_count
+        })
+    except Exception as e:
+        import traceback
+        return JsonResponse({
+            'status': 'error',
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        }, status=500)
+
+def simple_test(request):
+    """Ultra simple test endpoint"""
+    return HttpResponse("Server is running! Django is working.")
