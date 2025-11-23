@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from .models import Trip, TripImage, TripPost, ChatRoom, ChatMessage, UserProfile, TripReview, TripPhoto, FeaturedTripRequest
+from .models import Trip, TripImage, TripPost, ChatRoom, ChatMessage, UserProfile, TripReview, TripPhoto
 from .forms import TripForm, UserRegisterForm, TripPostForm, UserProfileForm
 from django.http import JsonResponse
 from django.db import models
@@ -390,10 +390,8 @@ def user_profile(request):
 
 @login_required
 def join_destination_trip(request, trip_id):
-    """Join system for featured trips - may require approval"""
+    """Direct join system for all trips"""
     trip = get_object_or_404(Trip, id=trip_id)
-    
-
     
     # Check if user is the trip creator
     if request.user == trip.created_by:
@@ -410,42 +408,10 @@ def join_destination_trip(request, trip_id):
         messages.warning(request, "This trip is already full.")
         return redirect('trip_detail', trip_id=trip.id)
     
-    # Check if this is a featured trip that requires approval
-    if trip.is_featured and trip.requires_approval:
-        # Check if user already has a request
-        existing_request = FeaturedTripRequest.objects.filter(trip=trip, user=request.user).first()
-        
-        if existing_request:
-            if existing_request.status == 'pending':
-                messages.warning(request, "Your join request is pending admin approval.")
-            elif existing_request.status == 'rejected':
-                messages.error(request, "Your join request was rejected by the admin.")
-            elif existing_request.status == 'approved':
-                messages.info(request, "Your request was approved! You should already be a member.")
-            return redirect('trip_detail', trip_id=trip.id)
-        
-        # Handle form submission for request
-        if request.method == 'POST':
-            message = request.POST.get('message', '').strip()
-            
-            # Create the join request
-            FeaturedTripRequest.objects.create(
-                trip=trip,
-                user=request.user,
-                message=message
-            )
-            
-            messages.success(request, f"🎯 Join request sent for {trip.destination}! Admin will review your request.")
-            return redirect('trip_detail', trip_id=trip.id)
-        
-        # Show request form for GET requests
-        return render(request, 'main/featured_trip_request.html', {'trip': trip})
-    
-    else:
-        # Direct join for non-featured trips or featured trips without approval
-        trip.add_member(request.user)
-        messages.success(request, f"🎉 Welcome to {trip.destination}! You joined the trip successfully!")
-        return redirect('trip_detail', trip_id=trip.id)
+    # Direct join for all trips
+    trip.add_member(request.user)
+    messages.success(request, f"🎉 Welcome to {trip.destination}! You joined the trip successfully!")
+    return redirect('trip_detail', trip_id=trip.id)
 
 
 @login_required

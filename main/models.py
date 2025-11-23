@@ -48,7 +48,6 @@ class Trip(models.Model):
     
     # Featured trip system
     is_featured = models.BooleanField(default=False, help_text="Mark as featured trip (admin only)")
-    requires_approval = models.BooleanField(default=False, help_text="Requires admin approval to join")
 
     def __str__(self):
         return f"{self.destination} ({self.start_date} - {self.end_date})"
@@ -101,49 +100,7 @@ class Trip(models.Model):
         super().save(*args, **kwargs)
 
 
-# ------------------------------------------------
-# 🌟 Featured Trip Join Request System
-# ------------------------------------------------
-class FeaturedTripRequest(models.Model):
-    STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
-    ]
-    
-    trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name='join_requests')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='featured_trip_requests')
-    message = models.TextField(blank=True, help_text="Optional message to admin")
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        unique_together = ('trip', 'user')  # One request per user per trip
-        ordering = ['-created_at']
-    
-    def __str__(self):
-        return f"{self.user.username} → {self.trip.destination} ({self.status})"
-    
-    def approve(self):
-        """Approve the request and add user to trip"""
-        if self.status != 'pending':
-            return False
-            
-        self.status = 'approved'
-        self.save()
-        
-        # Add user to trip
-        self.trip.joined_members.add(self.user)
-        
-        print(f"✅ APPROVED: {self.user.username} joined {self.trip.destination}")
-        return True
-    
-    def reject(self):
-        """Reject the request"""
-        self.status = 'rejected'
-        self.save()
-        return True
+
 
 
 # ------------------------------------------------
