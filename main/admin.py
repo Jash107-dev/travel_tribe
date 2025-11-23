@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from .models import (
     Trip, TripImage, TripPost, ChatRoom, ChatMessage, 
-    UserProfile, TripReview, TripPhoto
+    UserProfile, TripReview, TripPhoto, FeaturedTripRequest
 )
 
 # ================================================
@@ -18,9 +18,9 @@ class TripImageInline(admin.TabularInline):
 
 @admin.register(Trip)
 class TripAdmin(admin.ModelAdmin):
-    list_display = ('destination', 'start_date', 'end_date', 'category', 'members_count', 'members_limit', 'created_by', 'created_at')
+    list_display = ('destination', 'start_date', 'end_date', 'category', 'is_featured', 'requires_approval', 'members_count', 'members_limit', 'created_by', 'created_at')
     search_fields = ('destination', 'category', 'description')
-    list_filter = ('category', 'food_type', 'start_date', 'created_at')
+    list_filter = ('category', 'food_type', 'is_featured', 'requires_approval', 'start_date', 'created_at')
     date_hierarchy = 'start_date'
     inlines = [TripImageInline]
     readonly_fields = ('created_at',)
@@ -29,6 +29,10 @@ class TripAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Basic Information', {
             'fields': ('destination', 'category', 'start_date', 'end_date', 'members_limit')
+        }),
+        ('Featured Trip Settings', {
+            'fields': ('is_featured', 'requires_approval'),
+            'description': 'Featured trips appear on homepage and can require approval to join'
         }),
         ('Details', {
             'fields': ('description', 'food_type', 'transport_modes')
@@ -223,8 +227,45 @@ class TripPhotoAdmin(admin.ModelAdmin):
 
 
 # ================================================
-# JOIN REQUEST MANAGEMENT
+# FEATURED TRIP JOIN REQUESTS
 # ================================================
+
+@admin.register(FeaturedTripRequest)
+class FeaturedTripRequestAdmin(admin.ModelAdmin):
+    list_display = ('user', 'trip', 'status', 'created_at', 'updated_at')
+    search_fields = ('user__username', 'trip__destination', 'message')
+    list_filter = ('status', 'created_at', 'trip__is_featured')
+    date_hierarchy = 'created_at'
+    readonly_fields = ('created_at', 'updated_at')
+    
+    fieldsets = (
+        ('Request Information', {
+            'fields': ('trip', 'user', 'message', 'status')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    actions = ['approve_requests', 'reject_requests']
+    
+    def approve_requests(self, request, queryset):
+        approved_count = 0
+        for join_request in queryset.filter(status='pending'):
+            if not join_request.trip.is_full:
+                join_request.approve()
+                approved_count += 1
+        self.message_user(request, f"Approved {approved_count} requests")
+    approve_requests.short_description = "Approve selected requests"
+    
+    def reject_requests(self, request, queryset):
+        rejected_count = 0
+        for join_request in queryset.filter(status='pending'):
+            join_request.reject()
+            rejected_count += 1
+        self.message_user(request, f"Rejected {rejected_count} requests")
+    reject_requests.short_description = "Reject selected requests"
 
 
 

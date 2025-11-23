@@ -134,16 +134,16 @@
   </div>
 </section>
 
-<!-- Popular Destinations Section -->
+<!-- Featured Trips Section -->
 <section class="destinations-section">
   <div class="container">
     <div class="section-header">
-      <h2><i class="fas fa-map-marked-alt"></i> Popular Destinations</h2>
-      <p>Explore amazing places recommended by our community</p>
+      <h2><i class="fas fa-star"></i> Featured Trips</h2>
+      <p>Exclusive trips curated by our team - Join these amazing adventures!</p>
     </div>
 
     <div class="destinations-grid">
-      {% for trip in within_country %}
+      {% for trip in featured_trips %}
       <div class="destination-card">
         {% if trip.main_image %}
         <div class="destination-image">

@@ -56,13 +56,12 @@ def logout_view(request):
 # ===================================================================
 
 def home(request):
-    within_country = Trip.objects.filter(category__iexact="Within Country").order_by('-created_at')
-    outside_country = Trip.objects.filter(category__iexact="Outside Country").order_by('-created_at')
+    # Show featured trips instead of regular destination trips
+    featured_trips = Trip.objects.filter(is_featured=True).order_by('-created_at')
     tribe_posts = TripPost.objects.all().order_by('-created_at')[:5]
 
     return render(request, 'main/home.html', {
-        'within_country': within_country,
-        'outside_country': outside_country,
+        'featured_trips': featured_trips,
         'tribe_posts': tribe_posts,
     })
 
@@ -391,8 +390,11 @@ def user_profile(request):
 
 @login_required
 def join_destination_trip(request, trip_id):
-    """Direct join system - no approval needed"""
+    """Join system for featured trips - may require approval"""
     trip = get_object_or_404(Trip, id=trip_id)
+    
+    # Import the model here to avoid circular imports
+    from .models import FeaturedTripRequest
     
     # Check if user is the trip creator
     if request.user == trip.created_by:
@@ -409,11 +411,42 @@ def join_destination_trip(request, trip_id):
         messages.warning(request, "This trip is already full.")
         return redirect('trip_detail', trip_id=trip.id)
     
-    # Add user directly to trip
-    trip.add_member(request.user)
+    # Check if this is a featured trip that requires approval
+    if trip.is_featured and trip.requires_approval:
+        # Check if user already has a request
+        existing_request = FeaturedTripRequest.objects.filter(trip=trip, user=request.user).first()
+        
+        if existing_request:
+            if existing_request.status == 'pending':
+                messages.warning(request, "Your join request is pending admin approval.")
+            elif existing_request.status == 'rejected':
+                messages.error(request, "Your join request was rejected by the admin.")
+            elif existing_request.status == 'approved':
+                messages.info(request, "Your request was approved! You should already be a member.")
+            return redirect('trip_detail', trip_id=trip.id)
+        
+        # Handle form submission for request
+        if request.method == 'POST':
+            message = request.POST.get('message', '').strip()
+            
+            # Create the join request
+            FeaturedTripRequest.objects.create(
+                trip=trip,
+                user=request.user,
+                message=message
+            )
+            
+            messages.success(request, f"🎯 Join request sent for {trip.destination}! Admin will review your request.")
+            return redirect('trip_detail', trip_id=trip.id)
+        
+        # Show request form for GET requests
+        return render(request, 'main/featured_trip_request.html', {'trip': trip})
     
-    messages.success(request, f"🎉 Welcome to {trip.destination}! You joined the trip successfully!")
-    return redirect('trip_detail', trip_id=trip.id)
+    else:
+        # Direct join for non-featured trips or featured trips without approval
+        trip.add_member(request.user)
+        messages.success(request, f"🎉 Welcome to {trip.destination}! You joined the trip successfully!")
+        return redirect('trip_detail', trip_id=trip.id)
 
 
 @login_required

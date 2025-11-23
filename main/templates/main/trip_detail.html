@@ -27,6 +27,11 @@
       </div>
       {% endif %}
       <div class="hero-overlay">
+        {% if trip.is_featured %}
+        <div class="featured-badge" style="background: #ffd700; color: #333; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; display: inline-block;">
+          <i class="fas fa-star"></i> Featured Trip
+        </div>
+        {% endif %}
         <h1 class="trip-title">{{ trip.destination }}</h1>
         <div class="trip-meta">
           <span class="meta-item">
@@ -314,9 +319,15 @@
                   <i class="fas fa-lock"></i> Trip Full
                 </button>
               {% else %}
-                <a href="{% url 'join_destination_trip' trip.id %}" class="btn btn-primary btn-full">
-                  <i class="fas fa-plus"></i> Join Trip
-                </a>
+                {% if trip.is_featured and trip.requires_approval %}
+                  <a href="{% url 'join_destination_trip' trip.id %}" class="btn btn-primary btn-full">
+                    <i class="fas fa-star"></i> Request to Join Featured Trip
+                  </a>
+                {% else %}
+                  <a href="{% url 'join_destination_trip' trip.id %}" class="btn btn-primary btn-full">
+                    <i class="fas fa-plus"></i> Join Trip
+                  </a>
+                {% endif %}
               {% endif %}
             {% endif %}
           </div>
