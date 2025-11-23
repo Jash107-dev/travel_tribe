@@ -4,7 +4,7 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-minimal-key-12345')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-render-key-12345')
 DEBUG = False
 ALLOWED_HOSTS = ['*']
 
@@ -61,23 +61,11 @@ else:
         }
     }
 
-# Static files configuration - BULLETPROOF for Render
+# Static files - TESTED configuration for Render
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# This is the KEY setting for Render - tell Django where to find static files
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'main', 'static'),
-]
-
-# WhiteNoise configuration - ESSENTIAL for Render
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Additional WhiteNoise settings for better performance
-WHITENOISE_USE_FINDERS = True
-WHITENOISE_AUTOREFRESH = True
