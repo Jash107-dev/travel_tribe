@@ -59,7 +59,4 @@ urlpatterns = [
     
     # Admin user creation (for Render free tier)
     path('create-admin-user/', views.create_admin_user, name='create_admin_user'),
-    
-    # Health check
-    path('health/', views.health_check, name='health_check'),
 ]
