@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from .models import Trip, TripImage, TripPost, ChatRoom, ChatMessage, UserProfile, TripReview, TripPhoto, FeaturedTripRequest
 from .forms import TripForm, UserRegisterForm, TripPostForm, UserProfileForm
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.db import models
 
 
@@ -56,14 +56,37 @@ def logout_view(request):
 # ===================================================================
 
 def home(request):
-    # Show featured trips instead of regular destination trips
-    featured_trips = Trip.objects.filter(is_featured=True).order_by('-created_at')
-    tribe_posts = TripPost.objects.all().order_by('-created_at')[:5]
+    try:
+        # Show featured trips instead of regular destination trips
+        featured_trips = Trip.objects.filter(is_featured=True).order_by('-created_at')
+        tribe_posts = TripPost.objects.all().order_by('-created_at')[:5]
 
-    return render(request, 'main/home.html', {
-        'featured_trips': featured_trips,
-        'tribe_posts': tribe_posts,
-    })
+        return render(request, 'main/home.html', {
+            'featured_trips': featured_trips,
+            'tribe_posts': tribe_posts,
+        })
+    except Exception as e:
+        # Return error details for debugging
+        return HttpResponse(f"Home page error: {str(e)}", status=500)
+
+def health_check(request):
+    """Simple health check endpoint"""
+    try:
+        # Test database connection
+        trip_count = Trip.objects.count()
+        user_count = User.objects.count()
+        
+        return JsonResponse({
+            'status': 'healthy',
+            'trips': trip_count,
+            'users': user_count,
+            'featured_trips': Trip.objects.filter(is_featured=True).count()
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'error': str(e)
+        }, status=500)
 
 
 # ===================================================================
