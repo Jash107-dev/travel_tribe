@@ -100,12 +100,6 @@ if DATABASE_URL:
                 default=DATABASE_URL,
                 conn_max_age=600,
                 conn_health_checks=True,
-                options={
-                    'MAX_CONNS': 20,
-                    'OPTIONS': {
-                        'MAX_CONNS': 20,
-                    }
-                }
             )
         }
         print("✅ Using PostgreSQL database")
