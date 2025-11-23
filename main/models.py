@@ -57,6 +57,36 @@ class Trip(models.Model):
     def is_full(self):
         return self.members_count >= self.members_limit
     
+    @property
+    def is_expired(self):
+        """Check if trip has ended"""
+        from datetime import date
+        return self.end_date < date.today()
+    
+    @property
+    def is_active(self):
+        """Check if trip is currently active"""
+        from datetime import date
+        today = date.today()
+        return self.start_date <= today <= self.end_date
+    
+    @property
+    def is_upcoming(self):
+        """Check if trip is upcoming"""
+        from datetime import date
+        return self.start_date > date.today()
+    
+    @property
+    def status(self):
+        """Get trip status"""
+        if self.is_expired:
+            return "Completed"
+        elif self.is_active:
+            return "Active"
+        elif self.is_upcoming:
+            return "Upcoming"
+        return "Unknown"
+    
     def add_member(self, user):
         """Add member to trip directly"""
         self.joined_members.add(user)

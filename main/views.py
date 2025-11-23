@@ -76,6 +76,20 @@ def add_trip(request):
     if request.method == 'POST':
         form = TripForm(request.POST, request.FILES)
         if form.is_valid():
+            # Additional server-side validation
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data['end_date']
+            
+            # Double-check date validation
+            from datetime import date
+            if start_date < date.today():
+                messages.error(request, "Start date cannot be in the past.")
+                return render(request, 'main/add_trip.html', {'form': form})
+            
+            if end_date <= start_date:
+                messages.error(request, "End date must be after start date.")
+                return render(request, 'main/add_trip.html', {'form': form})
+            
             trip = form.save(commit=False)
             trip.created_by = request.user
             trip.save()
