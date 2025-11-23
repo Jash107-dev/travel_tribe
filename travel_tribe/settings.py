@@ -147,7 +147,7 @@ STATICFILES_DIRS = []  # Empty because we're using app-level static folders
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Simplified WhiteNoise configuration
+# WhiteNoise configuration
 WHITENOISE_AUTOREFRESH = True
 WHITENOISE_USE_FINDERS = True
 

@@ -90,6 +90,18 @@ def add_trip(request):
                 messages.error(request, "End date must be after start date.")
                 return render(request, 'main/add_trip.html', {'form': form})
             
+            # Validate main image if provided
+            main_image = request.FILES.get('main_image')
+            if main_image:
+                allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+                if main_image.content_type not in allowed_types:
+                    messages.error(request, "Main image must be a valid image file (JPEG, PNG, GIF, or WebP).")
+                    return render(request, 'main/add_trip.html', {'form': form})
+                
+                if main_image.size > 5 * 1024 * 1024:
+                    messages.error(request, "Main image file size must be less than 5MB.")
+                    return render(request, 'main/add_trip.html', {'form': form})
+            
             trip = form.save(commit=False)
             trip.created_by = request.user
             trip.save()
@@ -97,6 +109,14 @@ def add_trip(request):
             # Handle multiple image uploads
             images = request.FILES.getlist('additional_images')
             for image in images:
+                # Validate each additional image
+                allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+                if image.content_type not in allowed_types:
+                    continue  # Skip invalid images
+                
+                if image.size > 5 * 1024 * 1024:
+                    continue  # Skip large images
+                
                 TripImage.objects.create(trip=trip, image=image)
             
             messages.success(request, "Trip added successfully!")
@@ -598,13 +618,28 @@ def upload_photo(request, trip_id):
             messages.error(request, "Please select a photo to upload.")
             return redirect('trip_detail', trip_id=trip.id)
         
-        TripPhoto.objects.create(
-            trip=trip,
-            user=request.user,
-            photo=photo,
-            caption=caption
-        )
-        messages.success(request, "Photo uploaded successfully! 📸")
+        # Validate file type
+        allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+        if photo.content_type not in allowed_types:
+            messages.error(request, "Please upload a valid image file (JPEG, PNG, GIF, or WebP).")
+            return redirect('trip_detail', trip_id=trip.id)
+        
+        # Validate file size (max 5MB)
+        if photo.size > 5 * 1024 * 1024:
+            messages.error(request, "Image file size must be less than 5MB.")
+            return redirect('trip_detail', trip_id=trip.id)
+        
+        try:
+            TripPhoto.objects.create(
+                trip=trip,
+                user=request.user,
+                photo=photo,
+                caption=caption
+            )
+            messages.success(request, "Photo uploaded successfully! 📸")
+        except Exception as e:
+            messages.error(request, f"Error uploading photo: {str(e)}")
+        
         return redirect('trip_detail', trip_id=trip.id)
     
     return redirect('trip_detail', trip_id=trip.id)

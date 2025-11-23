@@ -17,9 +17,11 @@
 
     <!-- Hero Section -->
     <div class="trip-hero">
-      {% if trip.main_image %}
-      <img src="{{ trip.main_image.url }}" alt="{{ trip.destination }}" class="hero-image">
-      {% else %}
+      {% load main_extras %}
+      {% if trip.main_image|has_valid_image %}
+      <img src="{{ trip.main_image|safe_image_url }}" alt="{{ trip.destination }}" class="hero-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      {% endif %}
+      {% if not trip.main_image|has_valid_image %}
       <div class="hero-placeholder">
         <i class="fas fa-image"></i>
       </div>
@@ -95,12 +97,14 @@
           </div>
           <div class="gallery-grid">
             {% for img in images %}
+            {% if img.image|has_valid_image %}
             <div class="gallery-item">
-              <img src="{{ img.image.url }}" alt="Gallery Image">
+              <img src="{{ img.image|safe_image_url }}" alt="Gallery Image" onerror="this.parentElement.style.display='none';">
               {% if img.caption %}
               <div class="gallery-caption">{{ img.caption }}</div>
               {% endif %}
             </div>
+            {% endif %}
             {% endfor %}
           </div>
         </div>
@@ -129,8 +133,9 @@
           {% if trip.photos.all %}
           <div class="photo-gallery">
             {% for photo in trip.photos.all %}
+            {% if photo.photo|has_valid_image %}
             <div class="photo-card">
-              <img src="{{ photo.photo.url }}" alt="{{ photo.caption }}">
+              <img src="{{ photo.photo|safe_image_url }}" alt="{{ photo.caption }}" onerror="this.parentElement.style.display='none';">
               <div class="photo-info">
                 <div class="photo-user">
                   <i class="fas fa-user"></i> {{ photo.user.username }}
@@ -146,6 +151,7 @@
                 {% endif %}
               </div>
             </div>
+            {% endif %}
             {% endfor %}
           </div>
           {% else %}
