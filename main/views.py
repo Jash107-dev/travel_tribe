@@ -731,3 +731,23 @@ def health_check(request):
 def simple_test(request):
     """Ultra simple test endpoint"""
     return HttpResponse("Server is running! Django is working.")
+
+
+@login_required
+def make_me_admin(request):
+    """One-time endpoint to make current user an admin"""
+    user = request.user
+    
+    # Check if user is already admin
+    if user.is_superuser and user.is_staff:
+        return HttpResponse(f"✅ {user.username} is already an admin!")
+    
+    # Make user admin
+    user.is_staff = True
+    user.is_superuser = True
+    user.save()
+    
+    return HttpResponse(
+        f"✅ Success! {user.username} is now an admin!<br><br>"
+        f"<a href='/admin/'>Go to Admin Panel</a>"
+    )
