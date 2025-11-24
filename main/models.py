@@ -45,9 +45,6 @@ class Trip(models.Model):
     # New fields for joining trips
     members_limit = models.PositiveIntegerField(default=10, help_text="Maximum number of members")
     joined_members = models.ManyToManyField(User, related_name='joined_destination_trips', blank=True)
-    
-    # Featured trip system
-    is_featured = models.BooleanField(default=False, help_text="Mark as featured trip (admin only)")
 
     def __str__(self):
         return f"{self.destination} ({self.start_date} - {self.end_date})"

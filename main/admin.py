@@ -18,9 +18,9 @@ class TripImageInline(admin.TabularInline):
 
 @admin.register(Trip)
 class TripAdmin(admin.ModelAdmin):
-    list_display = ('destination', 'start_date', 'end_date', 'category', 'is_featured', 'members_count', 'members_limit', 'created_by', 'created_at')
+    list_display = ('destination', 'start_date', 'end_date', 'category', 'members_count', 'members_limit', 'created_by', 'created_at')
     search_fields = ('destination', 'category', 'description')
-    list_filter = ('category', 'food_type', 'is_featured', 'start_date', 'created_at')
+    list_filter = ('category', 'food_type', 'start_date', 'created_at')
     date_hierarchy = 'start_date'
     inlines = [TripImageInline]
     readonly_fields = ('created_at',)
@@ -29,10 +29,6 @@ class TripAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Basic Information', {
             'fields': ('destination', 'category', 'start_date', 'end_date', 'members_limit')
-        }),
-        ('Featured Trip Settings', {
-            'fields': ('is_featured',),
-            'description': 'Featured trips appear on homepage'
         }),
         ('Details', {
             'fields': ('description', 'food_type', 'transport_modes')

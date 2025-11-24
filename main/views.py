@@ -56,27 +56,14 @@ def logout_view(request):
 # ===================================================================
 
 def home(request):
-    # Simple, safe home view
-    try:
-        # Try to get featured trips, fallback if is_featured field doesn't exist
-        try:
-            featured_trips = Trip.objects.filter(is_featured=True).order_by('-created_at')[:10]
-            if not featured_trips.exists():
-                # If no featured trips, show recent trips
-                featured_trips = Trip.objects.all().order_by('-created_at')[:10]
-        except Exception:
-            # Fallback if is_featured column doesn't exist yet (migration pending)
-            featured_trips = Trip.objects.all().order_by('-created_at')[:10]
-        
-        tribe_posts = TripPost.objects.all().order_by('-created_at')[:5]
+    # Simple home view - show all recent trips
+    all_trips = Trip.objects.all().order_by('-created_at')[:10]
+    tribe_posts = TripPost.objects.all().order_by('-created_at')[:5]
 
-        return render(request, 'main/home.html', {
-            'featured_trips': featured_trips,
-            'tribe_posts': tribe_posts,
-        })
-    except Exception as e:
-        # Simple error response with proper import
-        return HttpResponse(f"Error loading home page: {str(e)}", status=500)
+    return render(request, 'main/home.html', {
+        'featured_trips': all_trips,
+        'tribe_posts': tribe_posts,
+    })
 
 
 # ===================================================================
@@ -728,17 +715,10 @@ def health_check(request):
         trip_count = Trip.objects.count()
         user_count = User.objects.count()
         
-        # Try to check featured trips, fallback if field doesn't exist
-        try:
-            featured_count = Trip.objects.filter(is_featured=True).count()
-        except Exception:
-            featured_count = 0
-        
         return JsonResponse({
             'status': 'healthy',
             'trips': trip_count,
-            'users': user_count,
-            'featured_trips': featured_count
+            'users': user_count
         })
     except Exception as e:
         import traceback
