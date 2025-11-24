@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from .models import Trip, TripImage, TripPost, ChatRoom, ChatMessage, UserProfile, TripReview, TripPhoto
 from .forms import TripForm, UserRegisterForm, TripPostForm, UserProfileForm
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.db import models
 
 
@@ -58,17 +58,25 @@ def logout_view(request):
 def home(request):
     # Simple, safe home view
     try:
-        # Get all trips (no featured filtering for now)
-        all_trips = Trip.objects.all().order_by('-created_at')[:10]
+        # Try to get featured trips, fallback if is_featured field doesn't exist
+        try:
+            featured_trips = Trip.objects.filter(is_featured=True).order_by('-created_at')[:10]
+            if not featured_trips.exists():
+                # If no featured trips, show recent trips
+                featured_trips = Trip.objects.all().order_by('-created_at')[:10]
+        except Exception:
+            # Fallback if is_featured column doesn't exist yet (migration pending)
+            featured_trips = Trip.objects.all().order_by('-created_at')[:10]
+        
         tribe_posts = TripPost.objects.all().order_by('-created_at')[:5]
 
         return render(request, 'main/home.html', {
-            'featured_trips': all_trips,  # Use all trips as featured for now
+            'featured_trips': featured_trips,
             'tribe_posts': tribe_posts,
         })
     except Exception as e:
-        # Simple error response
-        return HttpResponse(f"Error: {str(e)}", status=500)
+        # Simple error response with proper import
+        return HttpResponse(f"Error loading home page: {str(e)}", status=500)
 
 
 # ===================================================================
