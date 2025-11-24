@@ -1,4 +1,5 @@
 from django.urls import path
+from django.shortcuts import render
 from . import views
 
 urlpatterns = [
@@ -59,6 +60,7 @@ urlpatterns = [
     
     # Admin user creation (for Render free tier)
     path('create-admin-user/', views.create_admin_user, name='create_admin_user'),
+    path('upgrade-to-admin/', lambda request: render(request, 'main/upgrade_to_admin.html'), name='upgrade_to_admin'),
     
     # Health check
     path('health/', views.health_check, name='health_check'),

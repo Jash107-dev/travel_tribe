@@ -670,6 +670,29 @@ def create_admin_user(request):
     
     # SECURITY: Check if any superuser already exists
     if User.objects.filter(is_superuser=True).exists():
+        # Allow upgrading existing user to admin via special parameter
+        if request.method == 'POST' and request.POST.get('upgrade_user'):
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            
+            try:
+                # Authenticate the user first
+                user = authenticate(request, username=username, password=password)
+                if user is not None:
+                    # Make them admin
+                    user.is_staff = True
+                    user.is_superuser = True
+                    user.save()
+                    
+                    return HttpResponse(
+                        f"✅ Success! {user.username} is now an admin!<br><br>"
+                        f"<a href='/admin/'>Go to Admin Panel</a>"
+                    )
+                else:
+                    return HttpResponse("❌ Invalid username or password!", status=400)
+            except Exception as e:
+                return HttpResponse(f"❌ Error: {str(e)}", status=500)
+        
         return render(request, 'main/admin_blocked.html', {
             'admin_url': '/admin/',
             'message': '🔒 SECURITY: Admin already exists. Only ONE admin is allowed for security reasons.'
