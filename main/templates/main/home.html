@@ -19,9 +19,6 @@
       <a href="{% url 'trip_feed' %}" class="btn btn-primary">
         <i class="fas fa-users"></i> Find Travel Tribe
       </a>
-      <a href="{% url 'create_trip' %}" class="btn btn-primary">
-        <i class="fas fa-plus-circle"></i> Create Trip
-      </a>
     </div>
   </div>
   <div class="scroll-indicator">
@@ -116,10 +113,7 @@
       <div class="empty-state">
         <i class="fas fa-users-slash"></i>
         <h3>No active tribes yet</h3>
-        <p>Be the first to create a travel tribe!</p>
-        <a href="{% url 'create_trip' %}" class="btn btn-primary">
-          <i class="fas fa-plus-circle"></i> Create First Tribe
-        </a>
+        <p>Check back soon for new travel tribes!</p>
       </div>
       {% endfor %}
     </div>
@@ -199,10 +193,7 @@
       <div class="empty-state">
         <i class="fas fa-map-marked-alt"></i>
         <h3>No destinations yet</h3>
-        <p>Add your favorite travel destination!</p>
-        <a href="{% url 'add_trip' %}" class="btn btn-primary">
-          <i class="fas fa-plus-circle"></i> Add Destination
-        </a>
+        <p>Check back soon for exciting new destinations!</p>
       </div>
       {% endfor %}
     </div>
@@ -216,11 +207,8 @@
       <h2>Ready to Start Your Journey?</h2>
       <p>Join thousands of travelers exploring the world together</p>
       <div class="cta-buttons">
-        <a href="{% url 'create_trip' %}" class="btn btn-primary btn-lg">
-          <i class="fas fa-rocket"></i> Create Your Trip
-        </a>
-        <a href="{% url 'trip_feed' %}" class="btn btn-outline btn-lg">
-          <i class="fas fa-search"></i> Browse Tribes
+        <a href="{% url 'trip_feed' %}" class="btn btn-primary btn-lg">
+          <i class="fas fa-search"></i> Browse Travel Tribes
         </a>
       </div>
     </div>
