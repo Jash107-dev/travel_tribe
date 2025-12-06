@@ -256,9 +256,28 @@
 const chatMessages = document.getElementById('chatMessages');
 chatMessages.scrollTop = chatMessages.scrollHeight;
 
-// Auto-refresh messages every 5 seconds
+// Prevent form from refreshing while typing
+const textarea = document.querySelector('textarea[name="content"]');
+let isTyping = false;
+
+textarea.addEventListener('input', () => {
+    isTyping = true;
+    clearTimeout(window.typingTimeout);
+    window.typingTimeout = setTimeout(() => {
+        isTyping = false;
+    }, 3000);
+});
+
+// Auto-refresh messages every 5 seconds (only if not typing)
 setInterval(() => {
-    location.reload();
+    if (!isTyping) {
+        location.reload();
+    }
 }, 5000);
+
+// Scroll to bottom on new messages
+window.addEventListener('load', () => {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+});
 </script>
 {% endblock %}
