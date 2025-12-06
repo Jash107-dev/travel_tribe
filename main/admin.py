@@ -19,33 +19,44 @@ class TripImageInline(admin.TabularInline):
 @admin.register(Trip)
 class TripAdmin(admin.ModelAdmin):
     list_display = ('destination', 'start_date', 'end_date', 'category', 'members_count', 'members_limit', 'created_by', 'created_at')
-    search_fields = ('destination', 'category', 'description')
+    search_fields = ('destination', 'category', 'description', 'must_visit_places', 'must_try_foods')
     list_filter = ('category', 'food_type', 'start_date', 'created_at')
     date_hierarchy = 'start_date'
     inlines = [TripImageInline]
     readonly_fields = ('created_at',)
     filter_horizontal = ('joined_members',)
     
+    def save_model(self, request, obj, form, change):
+        """Auto-set created_by to current admin user if creating new trip"""
+        if not change:  # Only when creating new trip
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+    
     fieldsets = (
         ('Basic Information', {
-            'fields': ('destination', 'category', 'start_date', 'end_date', 'members_limit')
+            'fields': ('destination', 'category', 'start_date', 'end_date', 'tribe_count', 'members_limit'),
+            'description': 'Essential trip information'
         }),
         ('Details', {
-            'fields': ('description', 'food_type', 'transport_modes')
+            'fields': ('description', 'food_type', 'transport_modes'),
+            'description': 'Trip description and preferences'
         }),
         ('Recommendations', {
-            'fields': ('must_visit_places', 'must_try_foods')
+            'fields': ('must_visit_places', 'must_try_foods'),
+            'description': 'Places and foods to recommend to travelers'
         }),
         ('Media', {
-            'fields': ('main_image',)
+            'fields': ('main_image',),
+            'description': 'Main trip image (recommended size: 1200x800px)'
         }),
         ('Members', {
             'fields': ('joined_members',),
             'description': 'Manage users who have joined this trip'
         }),
         ('Metadata', {
-            'fields': ('created_by', 'created_at'),
-            'classes': ('collapse',)
+            'fields': ('created_at',),
+            'classes': ('collapse',),
+            'description': 'Trip creator is automatically set to the admin user'
         }),
     )
     
