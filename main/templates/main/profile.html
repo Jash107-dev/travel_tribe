@@ -123,7 +123,7 @@
             <i class="fas fa-user"></i>
           </div>
         {% endif %}
-        <h1>{{ user.username }}'s Profile</h1>
+        <h1>{{ user.username }}</h1>
         <p style="color: var(--text-light);">{{ user.email }}</p>
         
         <!-- Gamification Stats -->
@@ -145,17 +145,7 @@
           </div>
         </div>
 
-        <!-- Badges -->
-        {% if profile.badge_list %}
-        <div class="badges-section">
-          <h3><i class="fas fa-award"></i> Your Badges</h3>
-          <div class="badges-grid">
-            {% for badge in profile.badge_list %}
-            <div class="badge-item">{{ badge }}</div>
-            {% endfor %}
-          </div>
-        </div>
-        {% endif %}
+        <!-- Badges section removed -->
       </div>
 
       <form method="POST" enctype="multipart/form-data" class="modern-form">
