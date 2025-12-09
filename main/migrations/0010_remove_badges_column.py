@@ -3,6 +3,50 @@
 from django.db import migrations
 
 
+def remove_old_columns(apps, schema_editor):
+    """Remove old gamification columns from UserProfile if they exist"""
+    if schema_editor.connection.vendor == 'postgresql':
+        with schema_editor.connection.cursor() as cursor:
+            # Check and drop badges column
+            cursor.execute("""
+                DO $$ 
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns 
+                        WHERE table_name='main_userprofile' AND column_name='badges'
+                    ) THEN
+                        ALTER TABLE main_userprofile DROP COLUMN badges;
+                    END IF;
+                END $$;
+            """)
+            
+            # Check and drop level column
+            cursor.execute("""
+                DO $$ 
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns 
+                        WHERE table_name='main_userprofile' AND column_name='level'
+                    ) THEN
+                        ALTER TABLE main_userprofile DROP COLUMN level;
+                    END IF;
+                END $$;
+            """)
+            
+            # Check and drop points column
+            cursor.execute("""
+                DO $$ 
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns 
+                        WHERE table_name='main_userprofile' AND column_name='points'
+                    ) THEN
+                        ALTER TABLE main_userprofile DROP COLUMN points;
+                    END IF;
+                END $$;
+            """)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -11,27 +55,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(
-            code=lambda apps, schema_editor: schema_editor.execute(
-                """
-                DO $$ 
-                BEGIN
-                    IF EXISTS (SELECT 1 FROM information_schema.columns 
-                              WHERE table_name='main_userprofile' AND column_name='badges') THEN
-                        ALTER TABLE main_userprofile DROP COLUMN badges;
-                    END IF;
-                    
-                    IF EXISTS (SELECT 1 FROM information_schema.columns 
-                              WHERE table_name='main_userprofile' AND column_name='level') THEN
-                        ALTER TABLE main_userprofile DROP COLUMN level;
-                    END IF;
-                    
-                    IF EXISTS (SELECT 1 FROM information_schema.columns 
-                              WHERE table_name='main_userprofile' AND column_name='points') THEN
-                        ALTER TABLE main_userprofile DROP COLUMN points;
-                    END IF;
-                END $$;
-                """
-            ) if schema_editor.connection.vendor == 'postgresql' else None,
+            code=remove_old_columns,
             reverse_code=migrations.RunPython.noop
         ),
     ]
