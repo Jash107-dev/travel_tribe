@@ -123,25 +123,9 @@ class UserRegisterForm(UserCreationForm):
     def clean_password1(self):
         password = self.cleaned_data.get('password1')
         
+        # Simple validation - just minimum length
         if len(password) < 5:
             raise forms.ValidationError("Password must be at least 5 characters long.")
-        
-        # Check for uppercase letter
-        if not any(c.isupper() for c in password):
-            raise forms.ValidationError("Password must contain at least one uppercase letter.")
-        
-        # Check for lowercase letter
-        if not any(c.islower() for c in password):
-            raise forms.ValidationError("Password must contain at least one lowercase letter.")
-        
-        # Check for digit
-        if not any(c.isdigit() for c in password):
-            raise forms.ValidationError("Password must contain at least one number.")
-        
-        # Check for special character
-        special_chars = "!@#$%^&*(),.?\":{}|<>"
-        if not any(c in special_chars for c in password):
-            raise forms.ValidationError("Password must contain at least one special character (!@#$%^&*(),.?\":{}|<>).")
         
         return password
 

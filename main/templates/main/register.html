@@ -82,14 +82,7 @@
           </div>
           {% endif %}
           <div class="password-requirements">
-            <small>Password must contain: uppercase, lowercase, number, special character (min 5 chars)</small>
-            <div class="password-strength" id="password-strength">
-              <div class="requirement" id="req-length">✗ At least 5 characters</div>
-              <div class="requirement" id="req-upper">✗ Uppercase letter</div>
-              <div class="requirement" id="req-lower">✗ Lowercase letter</div>
-              <div class="requirement" id="req-number">✗ Number</div>
-              <div class="requirement" id="req-special">✗ Special character</div>
-            </div>
+            <small>Password must be at least 5 characters long</small>
           </div>
         </div>
 
@@ -217,59 +210,7 @@
     }
     
     function validatePassword() {
-      const password = document.getElementById('password1').value;
-      
-      // Check length
-      const lengthReq = document.getElementById('req-length');
-      if (password.length >= 5) {
-        lengthReq.textContent = '✓ At least 5 characters';
-        lengthReq.classList.add('valid');
-      } else {
-        lengthReq.textContent = '✗ At least 5 characters';
-        lengthReq.classList.remove('valid');
-      }
-      
-      // Check uppercase
-      const upperReq = document.getElementById('req-upper');
-      if (/[A-Z]/.test(password)) {
-        upperReq.textContent = '✓ Uppercase letter';
-        upperReq.classList.add('valid');
-      } else {
-        upperReq.textContent = '✗ Uppercase letter';
-        upperReq.classList.remove('valid');
-      }
-      
-      // Check lowercase
-      const lowerReq = document.getElementById('req-lower');
-      if (/[a-z]/.test(password)) {
-        lowerReq.textContent = '✓ Lowercase letter';
-        lowerReq.classList.add('valid');
-      } else {
-        lowerReq.textContent = '✗ Lowercase letter';
-        lowerReq.classList.remove('valid');
-      }
-      
-      // Check number
-      const numberReq = document.getElementById('req-number');
-      if (/[0-9]/.test(password)) {
-        numberReq.textContent = '✓ Number';
-        numberReq.classList.add('valid');
-      } else {
-        numberReq.textContent = '✗ Number';
-        numberReq.classList.remove('valid');
-      }
-      
-      // Check special character
-      const specialReq = document.getElementById('req-special');
-      if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-        specialReq.textContent = '✓ Special character';
-        specialReq.classList.add('valid');
-      } else {
-        specialReq.textContent = '✗ Special character';
-        specialReq.classList.remove('valid');
-      }
-      
-      // Check password match if confirm password has value
+      // Just check password match
       checkPasswordMatch();
     }
     
@@ -301,22 +242,20 @@
       });
     }, 5000);
     
-    // Prevent form submission if password requirements not met
+    // Prevent form submission if passwords don't match
     document.querySelector('.register-form').addEventListener('submit', function(e) {
       const password = document.getElementById('password1').value;
       const password2 = document.getElementById('password2').value;
       
-      // Check all requirements
-      const hasLength = password.length >= 5;
-      const hasUpper = /[A-Z]/.test(password);
-      const hasLower = /[a-z]/.test(password);
-      const hasNumber = /[0-9]/.test(password);
-      const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-      const passwordsMatch = password === password2;
-      
-      if (!hasLength || !hasUpper || !hasLower || !hasNumber || !hasSpecial || !passwordsMatch) {
+      if (password.length < 5) {
         e.preventDefault();
-        alert('Please ensure your password meets all requirements and passwords match.');
+        alert('Password must be at least 5 characters long.');
+        return false;
+      }
+      
+      if (password !== password2) {
+        e.preventDefault();
+        alert('Passwords do not match.');
         return false;
       }
     });
